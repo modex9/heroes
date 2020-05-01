@@ -1,0 +1,5 @@
+#login-form .invalid-feedback {
+    display: block;
+    padding: 10px 0;
+    color: red;
+}

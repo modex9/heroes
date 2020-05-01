@@ -1,7 +1,6 @@
 @extends('layouts.app')
 
 <script src="{{ asset('js/registration.js') }}" defer></script>
-<script src='https://www.google.com/recaptcha/api.js'></script>
 @section('content')
 <div class="container">
     <div class="row justify-content-center">
@@ -68,7 +67,7 @@
                         @if(env('GOOGLE_RECAPTCHA_KEY'))
                             <div class="form-group row mb-0">
                                 <div class="col-md-6 offset-md-4">
-                                    <button class="g-recaptcha" type="submit" class="btn btn-primary" data-sitekey="{{env('GOOGLE_RECAPTCHA_KEY')}}" data-callback="onSubmit">
+                                    <button type="submit" class="btn btn-primary g-recaptcha" data-sitekey="{{env('GOOGLE_RECAPTCHA_KEY')}}" data-callback="onSubmit">
                                         {{ __('Registruotis') }}
                                     </button>
                                 </div>
