@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 <script src="{{ asset('js/registration.js') }}" defer></script>
+<script src='https://www.google.com/recaptcha/api.js'></script>
 @section('content')
 <div class="container">
     <div class="row justify-content-center">
@@ -9,7 +10,7 @@
                 <div class="card-header">{{ __('Registracija') }}</div>
 
                 <div class="card-body">
-                    <form method="POST" action="{{ route('register') }}">
+                    <form method="POST" action="{{ route('register') }}" id="registration-form">
                         @csrf
 
                         <div class="form-group row">
@@ -64,13 +65,29 @@
 
                         <input type="hidden" id="referrer" name="referrer">
                         <input type="hidden" id="referral" name="referral">
-                        <div class="form-group row mb-0">
-                            <div class="col-md-6 offset-md-4">
-                                <button type="submit" class="btn btn-primary">
-                                    {{ __('Registruotis') }}
-                                </button>
+                        @if(env('GOOGLE_RECAPTCHA_KEY'))
+                            <div class="form-group row mb-0">
+                                <div class="col-md-6 offset-md-4">
+                                    <button class="g-recaptcha" type="submit" class="btn btn-primary" data-sitekey="{{env('GOOGLE_RECAPTCHA_KEY')}}" data-callback="onSubmit">
+                                        {{ __('Registruotis') }}
+                                    </button>
+                                </div>
                             </div>
-                        </div>
+                            @if ($errors->has('g-recaptcha-response'))
+                                <span class=”invalid-feedback d-block” role=”alert”>
+                                    <strong>{{ 'Recaptcha klaida' }}</strong>
+                                </span>
+                            @endif
+                        @else
+                            <div class="form-group row mb-0">
+                                <div class="col-md-6 offset-md-4">
+                                    <button type="submit" class="btn btn-primary">
+                                        {{ __('Registruotis') }}
+                                    </button>
+                                </div>
+                            </div>
+                        @endif
+
                     </form>
                 </div>
             </div>
