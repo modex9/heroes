@@ -18,7 +18,6 @@ class CreateUsersTable extends Migration
             $table->string('nickname')->unique();
             $table->string('email')->unique();
             $table->string('password');
-            $table->string('ip', 39);
             $table->string('referrer')->nullable();
             $table->string('referralID')->nullable();
             $table->tinyInteger('hero_id')->nullable();
