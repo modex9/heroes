@@ -53,7 +53,7 @@ class LoginController extends Controller
     {
         $browser_info = get_browser($request->userAgent(), true);
         Login::create([
-            'user' => $user->id,
+            'user_id' => $user->id,
             'ip' => $request->getClientIp(),
             'platform' => $browser_info['platform_description'] . " : " . $browser_info['browser']
         ]);

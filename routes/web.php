@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\User;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,3 +24,10 @@ Auth::routes();
 Route::get('/home', 'HomeController@index')->name('home');
 
 Route::get('register/{referral?}', 'Auth\RegisterController@showRegistrationForm')->name('register');
+Route::get('r', function() {
+    dd(User::all()->first()->logins);
+});
+
+//todo: papildomas middleware: ar useris turi herojų?
+Route::get('hero', 'HeroController@index')->middleware('auth');
+Route::post('hero', 'HeroController@store')->middleware('auth')->name('hero.store');
