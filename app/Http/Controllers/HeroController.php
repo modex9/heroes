@@ -7,7 +7,7 @@ use App\Hero;
 
 class HeroController extends Controller
 {
-    public function index() {
+    public function create() {
         return view('hero.create');
     }
 
