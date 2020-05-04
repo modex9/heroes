@@ -31,3 +31,4 @@ Route::get('r', function() {
 //todo: papildomas middleware: ar useris turi herojų?
 Route::get('hero', 'HeroController@create')->middleware(['auth', 'admin']);
 Route::post('hero', 'HeroController@store')->middleware(['auth', 'admin'])->name('hero.store');
+Route::resource('faction', 'FactionController')->middleware(['auth', 'admin']);
