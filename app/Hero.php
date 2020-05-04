@@ -9,7 +9,7 @@ class Hero extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'name', 'description'
+        'name', 'description', 'picture', 'faction_id'
     ];
 
     public function users() {
