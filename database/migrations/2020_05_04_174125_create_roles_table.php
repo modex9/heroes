@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateHeroesTable extends Migration
+class CreateRolesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,14 @@ class CreateHeroesTable extends Migration
      */
     public function up()
     {
-        Schema::create('heroes', function (Blueprint $table) {
+        Schema::create('roles', function (Blueprint $table) {
             $table->id();
-            $table->string('name', 50);
-            $table->string('description')->nullable();
-            $table->integer('faction_id')->default(1);
-            $table->integer('stats_id')->default(1);
+            $table->string('name', 5);
         });
+
+        DB::table('roles')->insert(array('name' => 'admin'));
+        DB::table('roles')->insert(array('name' => 'mod'));
+        DB::table('roles')->insert(array('name' => 'user'));
     }
 
     /**
@@ -29,6 +30,6 @@ class CreateHeroesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('heroes');
+        Schema::dropIfExists('roles');
     }
 }

@@ -44,4 +44,8 @@ class User extends Authenticatable
     public function hero() {
         return $this->belongsTo('App\Hero');
     }
+
+    public function role() {
+        return $this->belongsTo('App\Role');
+    }
 }
