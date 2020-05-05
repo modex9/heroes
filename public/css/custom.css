@@ -4,10 +4,22 @@
     color: red;
 }
 
+.centered {
+    width: 50%;
+    margin: auto;
+    text-align: center;
+}
+
 #admin-links li {
     font-style: bold;
     font-size: 20px;
 }
 #admin-links a {
     text-decoration: none;
+}
+
+#user-table tr, #user-table td, #user-table th {
+    text-align: center;
+    border: 1px solid black;
+    padding: 5px;
 }

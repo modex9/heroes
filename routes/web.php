@@ -30,4 +30,5 @@ Route::get('r', function() {
 
 Route::resource('hero', 'Admin\HeroController')->middleware(['auth', 'admin']);
 Route::resource('faction', 'Admin\FactionController')->middleware(['auth', 'admin']);
+Route::resource('user', 'Admin\UserController')->middleware(['auth', 'admin']);
 Route::get('admin', 'Admin\AdminController@index')->name('admin')->middleware(['auth', 'admin']);

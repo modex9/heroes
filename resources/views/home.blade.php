@@ -4,7 +4,7 @@
 <div class="container">
     @auth
         @if(Auth::user()->isAdmin())
-            <div style="width: 50%; margin: auto; text-align: center;">
+            <div class="centered">
                 <h2><a href="{{route('admin')}}">Admin Panel</a></h2>
             </div>
         @endif
