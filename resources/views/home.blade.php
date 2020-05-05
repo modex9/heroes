@@ -2,6 +2,13 @@
 
 @section('content')
 <div class="container">
+    @auth
+        @if(Auth::user()->isAdmin())
+            <div style="width: 50%; margin: auto; text-align: center;">
+                <h2><a href="{{route('admin')}}">Admin Panel</a></h2>
+            </div>
+        @endif
+    @endauth
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card">
@@ -13,8 +20,9 @@
                             {{ session('status') }}
                         </div>
                     @endif
-
-                    You are logged in!
+                    @auth
+                        You are logged in!
+                    @endauth
                 </div>
             </div>
         </div>

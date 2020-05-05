@@ -25,9 +25,9 @@ Route::get('/home', 'HomeController@index')->name('home');
 
 Route::get('register/{referral?}', 'Auth\RegisterController@showRegistrationForm')->name('register');
 Route::get('r', function() {
-    dd(User::all()->first()->logins);
+//    dd(Auth::user()->isAdmin());
 });
 
-//todo: papildomas middleware: ar useris turi herojų?
-Route::resource('hero', 'HeroController')->middleware(['auth', 'admin']);
-Route::resource('faction', 'FactionController')->middleware(['auth', 'admin']);
+Route::resource('hero', 'Admin\HeroController')->middleware(['auth', 'admin']);
+Route::resource('faction', 'Admin\FactionController')->middleware(['auth', 'admin']);
+Route::get('admin', 'Admin\AdminController@index')->name('admin')->middleware(['auth', 'admin']);

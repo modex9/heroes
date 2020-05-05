@@ -3,3 +3,11 @@
     padding: 10px 0;
     color: red;
 }
+
+#admin-links li {
+    font-style: bold;
+    font-size: 20px;
+}
+#admin-links a {
+    text-decoration: none;
+}
