@@ -15,10 +15,10 @@ class CreateLoginsTable extends Migration
     {
         Schema::create('logins', function (Blueprint $table) {
             $table->id();
-            $table->integer('user_id');
+            $table->tinyInteger('user_id');
             $table->string('ip', 39);
             $table->string('platform')->nullable();
-            $table->timestamps();
+            $table->timestamp('created_at');
         });
     }
 

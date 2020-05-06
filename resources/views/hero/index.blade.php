@@ -3,7 +3,7 @@
 @section('content')
     @foreach($heroes as $hero)
         <div style="margin-bottom: 50px;">
-            <h2>{{$hero->name}} ({{$hero->faction->name}})</h2>
+            <h2>{{$hero->name}} @if(isset($hero->faction))({{$hero->faction->name}})@endif</h2>
             <a href="{{route('hero.edit', $hero->id)}}" style="display: block;">Edit hero</a>
 
             <img src="{{$hero->picture}}" alt="{{$hero->name}}" width="200px">

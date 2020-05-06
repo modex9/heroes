@@ -16,11 +16,11 @@ class CreateUsersTable extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('nickname')->unique();
-            $table->string('email')->unique();
-            $table->string('password');
+            $table->string('nickname', 15)->unique();
+            $table->string('email', 60)->unique();
+            $table->string('password', 70);
             $table->string('referrer')->nullable();
-            $table->string('referralID')->nullable();
+            $table->string('referralID', 50)->nullable();
             $table->tinyInteger('hero_id')->nullable();
             //todo: sugalvot geresni buda, kad nereiketu ihardcodint
             $table->tinyInteger('role_id')->default(3);

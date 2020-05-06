@@ -15,11 +15,11 @@ class CreateHeroesTable extends Migration
     {
         Schema::create('heroes', function (Blueprint $table) {
             $table->id();
-            $table->string('name', 50);
+            $table->string('name', 30);
             $table->string('description')->nullable();
             $table->string('picture')->nullable();
-            $table->integer('faction_id')->default(1);
-            $table->integer('stats_id')->default(1);
+            $table->tinyInteger('faction_id')->default(1);
+            $table->tinyInteger('stats_id')->default(1);
         });
 
         DB::table('heroes')->insert(array(
