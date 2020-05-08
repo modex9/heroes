@@ -56,4 +56,13 @@ class User extends Authenticatable
     public function isAdmin() {
         return $this->role->name == 'admin';
     }
+
+    public function isBanned() {
+        if($this->bans->count() == 0)
+            return false;
+        $ban = $this->bans->last();
+        $bandEndsSeconds =  strtotime($ban->created_at) + $ban->duration * 3600;
+        return $bandEndsSeconds > 0;
+    }
+
 }
