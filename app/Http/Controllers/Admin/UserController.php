@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\User;
 use App\Role;
+use App\BanType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
@@ -19,7 +20,8 @@ class UserController extends Controller
     public function index()
     {
         $users = User::all();
-        return view('user.index', compact('users'));
+        $ban_types = BanType::all();
+        return view('user.index', compact('users', 'ban_types'));
     }
 
     /**
@@ -41,6 +43,8 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
+        if(!isset($request->nickname))
+            return back();
         User::create([
             'nickname' => $request->nickname,
             'email' => $request->email,
