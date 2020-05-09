@@ -61,7 +61,7 @@ class User extends Authenticatable
         if($this->bans->count() == 0)
             return false;
         $ban = $this->bans->last();
-        $bandEndsSeconds =  strtotime($ban->created_at) + $ban->duration * 3600;
+        $bandEndsSeconds =  strtotime($ban->created_at) + $ban->duration * 3600 - strtotime('now') - 3600*3;
         return $bandEndsSeconds > 0;
     }
 
