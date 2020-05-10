@@ -58,7 +58,7 @@ class User extends Authenticatable
     }
 
     public function isBanned() {
-        if($this->bans->count() == 0)
+        if($this->bans->count() == 0 || !$this->bans->last()->banIsValid())
             return false;
         $ban = $this->bans->last();
         $bandEndsSeconds =  strtotime($ban->created_at) + $ban->duration * 3600 - strtotime('now') - 3600*3;

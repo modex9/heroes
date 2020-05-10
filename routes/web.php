@@ -33,4 +33,5 @@ Route::resource('faction', 'Admin\FactionController')->middleware(['auth', 'admi
 Route::resource('user', 'Admin\UserController')->middleware(['auth', 'admin']);
 Route::get('admin', 'Admin\AdminController@index')->name('admin')->middleware(['auth', 'admin']);
 Route::get('banned', 'BannedController@bannedMessage')->name('banned');
-Route::get('ban/{user?}', 'Admin\BanController@execute')->name('ban.execute')->middleware(['auth', 'admin']);
+Route::post('ban/{user?}', 'Admin\BanController@execute')->name('ban.execute')->middleware(['auth', 'admin']);
+Route::post('unban/{user?}', 'Admin\BanController@amend')->name('ban.amend')->middleware(['auth', 'admin']);
