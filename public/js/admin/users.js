@@ -1,25 +1,42 @@
 $(() => {
     $('[id^="user-actions"]').on('change', e => {
         const action = $(e.target).find('option:selected').val();
+
+        //If action is ban
         if (action.includes('ban')) {
             const id = action.split('-')[1];
             const modal = $('option[value^="ban"]').attr('data-target');
+            const playerNickname = $(`#nickname-${id}`).text();
+            //Show modal
             $(modal).on('show.bs.modal', function(){
-                $(`${modal}Label`).text(`Užbaninti žaidėją ${$(`#nickname-${id}`).text()}`);
+                $(`${modal}Label`).text(`Užbaninti žaidėją ${playerNickname}`);
             });
             $('#banForm').on('submit', e => {
                 e.preventDefault();
                 const fieldIds = ['reason', 'duration', 'type_id'];
+                let fieldsData = {};
+                $.each(fieldIds, (i, val) => {
+                    fieldsData[val] = $(modal).find(`#${val}`)[0].value;
+                });
+                const data = {...fieldsData, ...{'user_id' : id}};
                 $.ajax({
                     type: 'post',
-                    data: {'user_id' : id, 'reason' : $(modal).find(`#${fieldIds[0]}`)[0].value,
-                        'duration' : $(modal).find(`#${fieldIds[1]}`)[0].value, 'type_id' : parseInt($(modal).find(`#${fieldIds[2]}`)[0].value)},
+                    data: data,
                     url: `${banUrl}/${id}`,
                     success: data => {
-                        $(modal).modal('hide');
+                        $(`#user-${id}`).addClass('banned');
+                        $(`#user-actions-${id}`).find(`#ban-${id}`).remove();
+                        $(modal).find('.modal-header').html('Žaidėjas sėkmingai užbanintas');
+                        $(modal).find('.modal-body').addClass('modal-success-message').html(`<h3>Žaidėjas ${playerNickname} užbanintas ${$(modal).find(`#${fieldIds[1]}`)[0].value} h.</h3>`);
+                        $(modal).find('button[type="submit"]').remove();
+                        setTimeout(() => {
+                            $(modal).modal('hide');
+                        }, 3000);
                     },
                     error: data => {
                         const errors = JSON.parse(data.responseText).errors;
+
+                        //Display error messages and add class for invalid inputs
                         $.each(fieldIds, (key,val) => {
                             if(errors[val] !== undefined) {
                                 $(`#${val}`).addClass('is-invalid');
@@ -35,6 +52,7 @@ $(() => {
             });
             $(modal).modal();
         }
+        // If actions is delete
         else if (action.includes('delete')) {
             const id = action.split('-')[1];
             $.ajax({
@@ -48,7 +66,10 @@ $(() => {
                 }
             });
         }
+        // If action is not Ajax, just redirect to it
         else document.location.href = action;
+
+        // Reset selection input
         $('[id^="user-actions"] option').prop('selected', function() {
             return this.defaultSelected;
         });

@@ -1,5 +1,5 @@
 <div class="form-group">
-    <select name="{{$name}}" id="{{$name}}" class="form-control" @if($required){!! "required" !!}@endif>
+    <select name="{{$name}}" id="{{$name}}" class="form-control" @if(isset($required) && $required){!! "required" !!}@endif>
         @foreach($options as $option)
             <option value="{{ $option->{$key} }}">{{$option->{$value} }}</option>
         @endforeach
