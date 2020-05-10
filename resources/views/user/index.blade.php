@@ -46,9 +46,9 @@
                 <form method="POST" id="banForm">
                     <div class="modal-body">
                             @csrf
-                            @include('components.form.textarea', ['label' => 'Priežastis', 'name' => 'reason'])
-                            @include('components.form.input', ['type' => 'number', 'label' => 'Trukmė (valandom)', 'name' => 'duration'])
-                            @include('components.form.select', ['options' => $ban_types, 'value' => 'name', 'name' => 'type', 'key' => 'id'])
+                            @include('components.form.textarea', ['label' => 'Priežastis', 'name' => 'reason', 'required' => true])
+                            @include('components.form.input', ['type' => 'number', 'label' => 'Trukmė (valandom)', 'name' => 'duration', 'required' => true])
+                            @include('components.form.select', ['options' => $ban_types, 'value' => 'name', 'name' => 'type_id', 'key' => 'id', 'required' => true])
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>

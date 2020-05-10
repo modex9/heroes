@@ -9,13 +9,27 @@ $(() => {
             });
             $('#banForm').on('submit', e => {
                 e.preventDefault();
+                const fieldIds = ['reason', 'duration', 'type_id'];
                 $.ajax({
                     type: 'post',
-                    data: {'user_id' : id, 'reason' : $(modal).find('#reason')[0].value,
-                        'duration' : $(modal).find('#duration')[0].value, 'type_id' : $(modal).find('#type')[0].value},
+                    data: {'user_id' : id, 'reason' : $(modal).find(`#${fieldIds[0]}`)[0].value,
+                        'duration' : $(modal).find(`#${fieldIds[1]}`)[0].value, 'type_id' : parseInt($(modal).find(`#${fieldIds[2]}`)[0].value)},
                     url: `${banUrl}/${id}`,
                     success: data => {
                         $(modal).modal('hide');
+                    },
+                    error: data => {
+                        const errors = JSON.parse(data.responseText).errors;
+                        $.each(fieldIds, (key,val) => {
+                            if(errors[val] !== undefined) {
+                                $(`#${val}`).addClass('is-invalid');
+                                $(`#${val} + .invalid-feedback`).show().find('strong').text(errors[val]);
+                            }
+                            else {
+                                $(`#${val}`).removeClass('is-invalid');
+                                $(`#${val} + .invalid-feedback`).hide().find('strong').text(errors[val]);
+                            }
+                        });
                     }
                 });
             });
