@@ -1,6 +1,7 @@
 @extends('layouts.app')
 <script type="text/javascript">
     const banUrl = "{{route('ban.execute')}}";
+    const unbanUrl = "{{route('ban.amend')}}";
 </script>
 <script src="{{ asset('js/admin/users.js') }}" defer></script>
 @section('content')
@@ -25,7 +26,8 @@
                             <option selected disabled>Action</option>
                             <option value="{{route('user.edit', $user->id)}}">Edit</option>
                             <option value="delete-{{$user->id}}">Delete</option>
-                            @if(!$user->isBanned())<option id="ban-{{$user->id}}" value="ban-{{$user->id}}" data-target="#banModal">Ban</option>@endif
+                            <option id="ban-{{$user->id}}" value="ban-{{$user->id}}" data-target="#banModal" @if($user->isBanned()) {!! "disabled" !!}@endif>Ban</option>
+                            <option id="unban-{{$user->id}}" value="unban-{{$user->id}}" data-target="#unbanModal" @if(!$user->isBanned()) {!! "disabled" !!}@endif>Unban</option>
                         </select>
                     </td>
                 </tr>
@@ -49,6 +51,29 @@
                             @include('components.form.textarea', ['label' => 'Priežastis', 'name' => 'reason', 'required' => true])
                             @include('components.form.input', ['type' => 'number', 'label' => 'Trukmė (valandom)', 'name' => 'duration', 'required' => true])
                             @include('components.form.select', ['options' => $ban_types, 'value' => 'name', 'name' => 'type_id', 'key' => 'id', 'required' => true])
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="unbanModal" tabindex="-1" role="dialog" aria-labelledby="unbanModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="unbanModalLabel">Modal title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form method="POST" id="unbanForm">
+                    <div class="modal-body">
+                        @csrf
+                        @include('components.form.textarea', ['label' => 'Priežastis', 'name' => 'reason', 'required' => true])
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>

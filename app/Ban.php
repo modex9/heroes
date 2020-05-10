@@ -41,4 +41,8 @@ class Ban extends Model
     public function unban() {
         return $this->hasOne('App\Unban');
     }
+
+    public function banIsValid() {
+        return is_null($this->unban);
+    }
 }

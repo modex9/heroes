@@ -16,6 +16,7 @@ class CreateUnbansTable extends Migration
         Schema::create('unbans', function (Blueprint $table) {
             $table->id();
             $table->integer('ban_id');
+            $table->string('reason');
             $table->integer('issuer');
             $table->timestamp('created_at');
         });
