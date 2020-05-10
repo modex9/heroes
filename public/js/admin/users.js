@@ -6,15 +6,17 @@ $(() => {
             const modal = $('option[value^="ban"]').attr('data-target');
             $(modal).on('show.bs.modal', function(){
                 $(`${modal}Label`).text(`Užbaninti žaidėją ${$(`#nickname-${id}`).text()}`);
-                $('#banForm').on('submit', () => {
-                   $.ajax({
-                       type: 'post',
-                       data: id,
-                       url: `${banUrl}/${id}`,
-                       success: data => {
-                           console.log('success');
-                       }
-                   });
+            });
+            $('#banForm').on('submit', e => {
+                e.preventDefault();
+                $.ajax({
+                    type: 'post',
+                    data: {'user_id' : id, 'reason' : $(modal).find('#reason')[0].value,
+                        'duration' : $(modal).find('#duration')[0].value, 'type_id' : $(modal).find('#type')[0].value},
+                    url: `${banUrl}/${id}`,
+                    success: data => {
+                        $(modal).modal('hide');
+                    }
                 });
             });
             $(modal).modal();
@@ -23,7 +25,6 @@ $(() => {
             const id = action.split('-')[1];
             $.ajax({
                 type: 'delete',
-                data: id,
                 url: document.URL + '/' + id,
                 success: data => {
                     if(data['status']) {
