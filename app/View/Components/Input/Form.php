@@ -4,24 +4,23 @@ namespace App\View\Components\Input;
 
 use Illuminate\View\Component;
 
-class Button extends Component
+class Form extends Component
 {
+    public $method;
 
-    public $text;
+    public $id;
 
-    public $buttonClass;
-
-    public $type;
+    public $action;
     /**
      * Create a new component instance.
      *
      * @return void
      */
-    public function __construct($text = 'Save', $buttonClass = 'btn btn-primary', $type = 'submit')
+    public function __construct($id, $action = '', $method = 'post')
     {
-        $this->text = $text;
-        $this->buttonClass = $buttonClass;
-        $this->type = $type;
+        $this->id = $id;
+        $this->action = $action;
+        $this->method = $method;
     }
 
     /**
@@ -31,6 +30,6 @@ class Button extends Component
      */
     public function render()
     {
-        return view('components.input.button');
+        return view('components.input.form');
     }
 }

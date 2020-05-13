@@ -1,3 +1,1 @@
-<div class="form-group">
-    <button class="btn {{$buttonClass}}" type="{{$type}}">{{$text}}</button>
-</div>
+<button class="{{$buttonClass}}" type="{{$type}}">{{$text}}</button>
