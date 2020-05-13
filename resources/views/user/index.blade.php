@@ -35,52 +35,33 @@
             </tbody>
         </table>
     </div>
-    <!-- Modal -->
-    <div class="modal fade" id="banModal" tabindex="-1" role="dialog" aria-labelledby="banModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="banModalLabel">Modal title</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <form method="POST" id="banForm">
-                    <div class="modal-body">
-                            @csrf
-                            @include('components.form.textarea', ['label' => 'Priežastis', 'name' => 'reason', 'required' => true])
-                            @include('components.form.input', ['type' => 'number', 'label' => 'Trukmė (valandom)', 'name' => 'duration', 'required' => true])
-                            @include('components.form.select', ['options' => $ban_types, 'value' => 'name', 'name' => 'type_id', 'key' => 'id', 'required' => true])
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Save changes</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
 
-    <div class="modal fade" id="unbanModal" tabindex="-1" role="dialog" aria-labelledby="unbanModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="unbanModalLabel">Modal title</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <form method="POST" id="unbanForm">
-                    <div class="modal-body">
-                        @csrf
-                        @include('components.form.textarea', ['label' => 'Priežastis', 'name' => 'reason', 'required' => true])
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Save changes</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+    <x-modal.modal id="banModal">
+        <x-modal.header id="banModal"/>
+        <x-input.form id="banForm">
+            <x-modal.body>
+                <x-input.textarea name="reason" label="Priežastis"/>
+                <x-input.input name="duration" label="Trukmė (valandom)" type="number"/>
+                <x-input.select name="type_id" label="Tipas" :options="$ban_types" option-value="name"/>
+            </x-modal.body>
+            <x-modal.footer>
+                <x-modal.dismiss_btn>Close</x-modal.dismiss_btn>
+                <x-input.button text="Save changes"/>
+            </x-modal.footer>
+        </x-input.form>
+    </x-modal.modal>
+
+    <x-modal.modal id="unbanModal">
+        <x-modal.header id="unbanModal"/>
+        <x-input.form id="unbanForm">
+            <x-modal.body>
+                <x-input.textarea name="reason" label="Priežastis"/>
+            </x-modal.body>
+            <x-modal.footer>
+                <x-modal.dismiss_btn>Close</x-modal.dismiss_btn>
+                <x-input.button text="Save changes"/>
+            </x-modal.footer>
+        </x-input.form>
+    </x-modal.modal>
+
 @endsection
