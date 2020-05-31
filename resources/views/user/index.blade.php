@@ -35,33 +35,43 @@
             </tbody>
         </table>
     </div>
+    <div id="app">
+        <table-component users-route="{{route('fetchUsers')}}" roles-route="{{route('fetchRoles')}}"></table-component>
+    </div>
+    <script type="application/javascript" src="{{asset('js/app.js')}}"></script>
 
-    <x-modal.modal id="banModal">
-        <x-modal.header id="banModal"/>
-        <x-input.form id="banForm">
-            <x-modal.body>
-                <x-input.textarea name="reason" label="Priežastis"/>
-                <x-input.input name="duration" label="Trukmė (valandom)" type="number"/>
-                <x-input.select name="type_id" label="Tipas" :options="$ban_types" option-value="name"/>
-            </x-modal.body>
-            <x-modal.footer>
-                <x-modal.dismiss_btn>Close</x-modal.dismiss_btn>
-                <x-input.button text="Save changes"/>
-            </x-modal.footer>
-        </x-input.form>
-    </x-modal.modal>
+{{--    <x-modal.modal id="banModal">--}}
+{{--        <x-modal.header id="banModal"/>--}}
+{{--        <x-input.form id="banForm">--}}
+{{--            <x-modal.body>--}}
+{{--                <x-input.textarea name="reason" label="Priežastis"/>--}}
+{{--                <x-input.input name="duration" label="Trukmė (valandom)" type="number"/>--}}
+{{--                <x-input.select name="type_id" label="Tipas" :options="$ban_types" option-value="name"/>--}}
+{{--            </x-modal.body>--}}
+{{--            <x-modal.footer>--}}
+{{--                <x-modal.dismiss_btn>Close</x-modal.dismiss_btn>--}}
+{{--                <x-input.button text="Save changes"/>--}}
+{{--            </x-modal.footer>--}}
+{{--        </x-input.form>--}}
+{{--    </x-modal.modal>--}}
 
-    <x-modal.modal id="unbanModal">
-        <x-modal.header id="unbanModal"/>
-        <x-input.form id="unbanForm">
-            <x-modal.body>
-                <x-input.textarea name="reason" label="Priežastis"/>
-            </x-modal.body>
-            <x-modal.footer>
-                <x-modal.dismiss_btn>Close</x-modal.dismiss_btn>
-                <x-input.button text="Save changes"/>
-            </x-modal.footer>
-        </x-input.form>
-    </x-modal.modal>
+{{--    <x-modal.modal id="unbanModal">--}}
+{{--        <x-modal.header id="unbanModal"/>--}}
+{{--        <x-input.form id="unbanForm">--}}
+{{--            <x-modal.body>--}}
+{{--                <x-input.textarea name="reason" label="Priežastis"/>--}}
+{{--            </x-modal.body>--}}
+{{--            <x-modal.footer>--}}
+{{--                <x-modal.dismiss_btn>Close</x-modal.dismiss_btn>--}}
+{{--                <x-input.button text="Save changes"/>--}}
+{{--            </x-modal.footer>--}}
+{{--        </x-input.form>--}}
+{{--    </x-modal.modal>--}}
 
 @endsection
+{{--<script>--}}
+{{--    import Table from "../../js/components/Table";--}}
+{{--    export default {--}}
+{{--        components: {Table}--}}
+{{--    }--}}
+{{--</script>--}}

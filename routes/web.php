@@ -31,6 +31,8 @@ Route::get('r', function() {
 Route::resource('hero', 'Admin\HeroController')->middleware(['auth', 'admin']);
 Route::resource('faction', 'Admin\FactionController')->middleware(['auth', 'admin']);
 Route::resource('user', 'Admin\UserController')->middleware(['auth', 'admin']);
+Route::get('users', 'Admin\UserController@getUsers')->middleware(['auth', 'admin'])->name('fetchUsers');
+Route::get('roles', 'Admin\RoleController@getRoles')->middleware(['auth', 'admin'])->name('fetchRoles');
 Route::get('admin', 'Admin\AdminController@index')->name('admin')->middleware(['auth', 'admin']);
 Route::get('banned', 'BannedController@bannedMessage')->name('banned');
 Route::post('ban/{user?}', 'Admin\BanController@execute')->name('ban.execute')->middleware(['auth', 'admin']);
