@@ -28,6 +28,7 @@
             },
             sendAction : function () {
                 this.$emit('change', this.selected);
+                this.selected = undefined;
             },
 
         }

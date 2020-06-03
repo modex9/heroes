@@ -1951,13 +1951,51 @@ __webpack_require__.r(__webpack_exports__);
       error: null,
       roles: null,
       headers: ['Nickname', 'E-mail', 'Referral', 'Role', 'Actions'],
-      selectedAction: '' //showModal : false,
-
+      selectedAction: '',
+      modalInputs: {
+        'edit': {
+          nickname: {
+            name: 'nickname',
+            type: 'input',
+            label: 'Nickname'
+          },
+          email: {
+            name: 'email',
+            type: 'input',
+            label: 'E-mail',
+            placeholder: 'Leaving empty will leave password the same.'
+          },
+          password: {
+            name: 'password',
+            type: 'input',
+            label: 'Password'
+          },
+          role: {
+            name: 'role',
+            type: 'select',
+            label: 'Role'
+          }
+        },
+        user: {}
+      }
     };
   },
+  watch: {},
   created: function created() {
+    this.modalInputs['edit']['role']['options'] = this.roles;
     this.fetchUsers();
     this.fetchRoles();
+  },
+  computed: {
+    action: function action() {
+      return this.selectedAction.split('-')[0];
+    },
+    userId: function userId() {
+      return this.selectedAction.split('-')[1];
+    },
+    editTitle: function editTitle() {
+      return "Edit user ".concat(this.modalInputs['user']['nickname']);
+    }
   },
   methods: {
     fetchUsers: function fetchUsers() {
@@ -1965,10 +2003,14 @@ __webpack_require__.r(__webpack_exports__);
 
       this.users = this.error = null;
       this.loading = true;
+      var users = {};
       fetch(this.usersRoute).then(function (data) {
         return data.json();
       }).then(function (data) {
-        return _this.users = data;
+        data.forEach(function (val) {
+          users[val.id] = val;
+        });
+        _this.users = users;
       })["catch"](function (error) {
         return _this.error = error;
       }).then(function () {
@@ -1988,6 +2030,7 @@ __webpack_require__.r(__webpack_exports__);
           roles[val.id] = val;
         });
         _this2.roles = roles;
+        _this2.modalInputs['edit']['role']['options'] = roles;
       })["catch"](function (error) {
         return _this2.error = error;
       }).then(function () {
@@ -1995,11 +2038,15 @@ __webpack_require__.r(__webpack_exports__);
       });
     },
     updateSelected: function updateSelected(value) {
-      this.selectedAction = value; // $('[id$="modal"]').modal();
-    } // showModal(modal) {
-    //     $(`#${modal}`).modal();
-    // }
-
+      this.selectedAction = value;
+    },
+    inputFields: function inputFields() {
+      if (this.action == 'edit') this.modalInputs['user'] = this.users[this.userId];
+      return this.modalInputs[this.action];
+    },
+    updateUser: function updateUser(user) {
+      this.users[user['id']] = user;
+    }
   }
 });
 
@@ -2038,12 +2085,29 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "UserActionModal",
-  props: ['action', 'visible'],
+  props: ['action', 'visible', 'inputs', 'user', 'title'],
   data: function data() {
     return {
-      id: ''
+      id: '',
+      data: {},
+      modalErrors: {},
+      actionSuccess: false
     };
   },
   watch: {
@@ -2053,18 +2117,63 @@ __webpack_require__.r(__webpack_exports__);
       this.id = this.modalId;
       this.$nextTick(function () {
         $("#".concat(_this.id)).modal();
-      }); //this.$emit('show-modal', this.id);
-      //$(`#${this.action}-modal`).modal();
+      });
+    },
+    user: function user() {
+      var _this2 = this;
+
+      this.modalErrors = {};
+      var keys = Object.keys(this.inputs);
+      keys.forEach(function (val) {
+        if (_this2.inputs[val]['type'] == 'select') Vue.set(_this2.data, val, _this2.user["".concat(val, "_id")]);else Vue.set(_this2.data, val, _this2.user[val]);
+      });
     }
   },
   computed: {
     modalId: function modalId() {
       return "".concat(this.action, "-modal");
+    },
+    // formId() {
+    //     return `${this.action}Form`;
+    // },
+    route: function route() {
+      if (this.action.includes('edit')) return "".concat(document.location.href, "/").concat(this.user['id']);
+    },
+    successMessage: function successMessage() {
+      switch (this.action.split('-')[0]) {
+        case 'edit':
+          return "User ".concat(this.user['nickname'], " was successfully updated.");
+
+        default:
+          return '';
+      }
     }
   },
-  methods: {// appendAction(postfix) {
-    //     this.modalId = `${this.action}${postfix}`;
-    // },
+  methods: {
+    handleAction: function handleAction() {
+      var _this3 = this;
+
+      this.modalErrors = {};
+      this.data['id'] = this.user['id'];
+      fetch(this.route, {
+        method: "PUT",
+        body: JSON.stringify(this.data),
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+      }).then(function (data) {
+        return data.json();
+      }).then(function (data) {
+        if (!data['success']) _this3.modalErrors = data['errors'];else {
+          _this3.$emit('user-updated', data['user']);
+
+          _this3.actionSuccess = true;
+        }
+      })["catch"](function (error) {
+        return console.log(error);
+      });
+    }
   }
 });
 
@@ -2108,6 +2217,7 @@ __webpack_require__.r(__webpack_exports__);
     },
     sendAction: function sendAction() {
       this.$emit('change', this.selected);
+      this.selected = undefined;
     }
   }
 });
@@ -37810,7 +37920,17 @@ var render = function() {
     _vm._v(" "),
     _c(
       "div",
-      [_c("user-action-modal", { attrs: { action: _vm.selectedAction } })],
+      [
+        _c("user-action-modal", {
+          attrs: {
+            title: _vm.editTitle,
+            inputs: _vm.inputFields(),
+            user: _vm.modalInputs["user"],
+            action: _vm.selectedAction
+          },
+          on: { "user-updated": _vm.updateUser }
+        })
+      ],
       1
     )
   ])
@@ -37854,25 +37974,163 @@ var render = function() {
         _c("div", { staticClass: "modal-content" }, [
           _c("div", { staticClass: "modal-header" }, [
             _c("h5", { staticClass: "modal-title", attrs: { id: "xc" } }, [
-              _vm._v(_vm._s(_vm.modalId))
+              _vm._v(_vm._s(_vm.title))
             ]),
             _vm._v(" "),
             _vm._m(0)
-          ])
-        ]),
-        _vm._v(" "),
-        _vm._m(1),
-        _vm._v(" "),
-        _c("div", { staticClass: "modal-footer" }),
-        _vm._v(" "),
-        _c(
-          "button",
-          {
-            staticClass: "btn btn-secondary",
-            attrs: { type: "button", "data-dismiss": "modal" }
-          },
-          [_vm._v("Close")]
-        )
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "modal-body" }, [
+            !_vm.actionSuccess
+              ? _c(
+                  "div",
+                  { attrs: { id: "before-send" } },
+                  _vm._l(_vm.inputs, function(input) {
+                    return _c("div", { staticClass: "form-group" }, [
+                      _c("label", { attrs: { for: input["name"] } }, [
+                        _vm._v(_vm._s(input["label"]))
+                      ]),
+                      _vm._v(" "),
+                      input["type"] == "input"
+                        ? _c("input", {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value: _vm.data[input["name"]],
+                                expression: "data[input['name']]"
+                              }
+                            ],
+                            staticClass: "form-control",
+                            class: {
+                              "is-invalid": input["name"] in _vm.modalErrors
+                            },
+                            attrs: {
+                              type: "text",
+                              name: input["name"],
+                              id: input["name"],
+                              required: ""
+                            },
+                            domProps: { value: _vm.data[input["name"]] },
+                            on: {
+                              input: function($event) {
+                                if ($event.target.composing) {
+                                  return
+                                }
+                                _vm.$set(
+                                  _vm.data,
+                                  input["name"],
+                                  $event.target.value
+                                )
+                              }
+                            }
+                          })
+                        : input["type"] == "select"
+                        ? _c(
+                            "select",
+                            {
+                              directives: [
+                                {
+                                  name: "model",
+                                  rawName: "v-model",
+                                  value: _vm.data[input["name"]],
+                                  expression: "data[input['name']]"
+                                }
+                              ],
+                              attrs: { name: input["name"], id: input["name"] },
+                              on: {
+                                change: function($event) {
+                                  var $$selectedVal = Array.prototype.filter
+                                    .call($event.target.options, function(o) {
+                                      return o.selected
+                                    })
+                                    .map(function(o) {
+                                      var val =
+                                        "_value" in o ? o._value : o.value
+                                      return val
+                                    })
+                                  _vm.$set(
+                                    _vm.data,
+                                    input["name"],
+                                    $event.target.multiple
+                                      ? $$selectedVal
+                                      : $$selectedVal[0]
+                                  )
+                                }
+                              }
+                            },
+                            _vm._l(input["options"], function(option) {
+                              return _c(
+                                "option",
+                                { domProps: { value: option["id"] } },
+                                [_vm._v(_vm._s(option["name"]))]
+                              )
+                            }),
+                            0
+                          )
+                        : _vm._e(),
+                      _vm._v(" "),
+                      input["name"] in _vm.modalErrors
+                        ? _c(
+                            "span",
+                            {
+                              staticClass: "invalid-feedback",
+                              attrs: { role: "alert" }
+                            },
+                            [
+                              _c("strong", [
+                                _vm._v(
+                                  _vm._s(_vm.modalErrors[input["name"]][0])
+                                )
+                              ])
+                            ]
+                          )
+                        : _vm._e()
+                    ])
+                  }),
+                  0
+                )
+              : _c("div", { attrs: { id: "action-success" } }, [
+                  _vm._v(
+                    "\n                    " +
+                      _vm._s(_vm.successMessage) +
+                      "\n                "
+                  )
+                ])
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "modal-footer" }),
+          _vm._v(" "),
+          !_vm.actionSuccess
+            ? _c(
+                "button",
+                {
+                  staticClass: "btn btn-primary",
+                  attrs: { type: "submit" },
+                  on: {
+                    click: function($event) {
+                      return _vm.handleAction()
+                    }
+                  }
+                },
+                [_vm._v("Save changes")]
+              )
+            : _vm._e(),
+          _vm._v(" "),
+          _c(
+            "button",
+            {
+              staticClass: "btn btn-secondary",
+              attrs: { type: "button", "data-dismiss": "modal" },
+              on: {
+                click: function($event) {
+                  _vm.actionSuccess = false
+                }
+              }
+            },
+            [_vm._v("Close")]
+          )
+        ])
       ])
     ]
   )
@@ -37894,14 +38152,6 @@ var staticRenderFns = [
       },
       [_c("span", { attrs: { "aria-hidden": "true" } }, [_vm._v("×")])]
     )
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "modal-body" }, [
-      _c("form", { attrs: { method: "post", id: "x", action: "" } })
-    ])
   }
 ]
 render._withStripped = true

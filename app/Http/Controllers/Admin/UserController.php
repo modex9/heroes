@@ -9,6 +9,8 @@ use App\BanType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
@@ -73,8 +75,9 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        $roles = Role::all();
-        return view('user.edit', compact('user', 'roles'));
+
+//        $roles = Role::all();
+//        return view('user.edit', compact('user', 'roles'));
     }
 
     /**
@@ -86,11 +89,43 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
+        $rules = [
+            'nickname' => [
+                'required',
+                'min:4',
+                'max:15',
+                Rule::unique('users')->ignore($user->id),
+            ],
+            'email' => [
+                'required',
+                'max:50',
+                'email',
+                Rule::unique('users')->ignore($user->id),
+            ],
+            'role_id' => 'integer|between:1,3',
+            'id' => 'integer',
+        ];
+        if($request->password)
+            $rules['password'] = 'string|min:6|max:16';
+        $validator = Validator::make($request->all(), $rules);
+        // Validate the input and return correct response
+        if ($validator->fails())
+        {
+            return response()->json(array(
+                'success' => false,
+                'errors' => $validator->getMessageBag()->toArray()
+
+            ), 400); // 400 being the HTTP code for an invalid request.
+        }
+
         $user->nickname = $request->nickname;
         $user->email = $request->email;
         $user->role_id = $request->role;
+        //If validation was passed, the password is good
+        if($request->password)
+            $user->password = Hash::make($request->password);
         $user->save();
-        return redirect('user');
+        return response()->json(array('success' => true, 'user' => $user), 200);
     }
 
     /**
