@@ -45,15 +45,19 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        if(!isset($request->nickname))
-            return back();
-        User::create([
+        $user_rules = $this->getUserRules();
+        $user_rules['password'] = 'string|min:6|max:16|required';
+        $not_validated = $this->validateUser($request, $user_rules);
+        if($not_validated)
+            return $not_validated;
+
+        $user = User::create([
             'nickname' => $request->nickname,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role_id' => $request->role
         ]);
-        return redirect('user');
+        return response()->json(array('success' => true, 'user' => $user), 200);
     }
 
     /**
@@ -89,34 +93,12 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        $rules = [
-            'nickname' => [
-                'required',
-                'min:4',
-                'max:15',
-                Rule::unique('users')->ignore($user->id),
-            ],
-            'email' => [
-                'required',
-                'max:50',
-                'email',
-                Rule::unique('users')->ignore($user->id),
-            ],
-            'role_id' => 'integer|between:1,3',
-            'id' => 'integer',
-        ];
+        $user_rules = $this->getUserRules($user);
         if($request->password)
-            $rules['password'] = 'string|min:6|max:16';
-        $validator = Validator::make($request->all(), $rules);
-        // Validate the input and return correct response
-        if ($validator->fails())
-        {
-            return response()->json(array(
-                'success' => false,
-                'errors' => $validator->getMessageBag()->toArray()
-
-            ), 400); // 400 being the HTTP code for an invalid request.
-        }
+            $user_rules['password'] = 'string|min:6|max:16';
+        $not_validated = $this->validateUser($request, $user_rules);
+        if($not_validated)
+            return $not_validated;
 
         $user->nickname = $request->nickname;
         $user->email = $request->email;
@@ -151,5 +133,23 @@ class UserController extends Controller
 
     public function getUsers() {
         return json_encode(User::all());
+    }
+
+    public function getUserRules($user = null) {
+        return User::getRules($user);
+    }
+
+    public function validateUser($request, $rules) {
+        $validator = Validator::make($request->all(), $rules);
+        // Validate the input and return correct response
+        if ($validator->fails())
+        {
+            return response()->json(array(
+                'success' => false,
+                'errors' => $validator->getMessageBag()->toArray()
+
+            ), 400); // 400 being the HTTP code for an invalid request.
+        }
+        else return false;
     }
 }

@@ -16,8 +16,10 @@
             </tr>
             </tbody>
         </table>
+        <a @click="selectedAction = 'add'" id="add-user">Add new User</a>
         <div>
-            <user-action-modal @user-updated="updateUser" :title="editTitle" :inputs="inputFields()" :user="modalInputs['user']" :action="selectedAction"></user-action-modal>
+            <user-action-modal @user-updated="updateUser" :title="title" :inputs="inputFields()" @modal-closed="selectedAction = ''" :user="modalInputs['user']"
+                               :action="selectedAction"></user-action-modal>
         </div>
     </div>
 
@@ -53,7 +55,6 @@
                             name : 'email',
                             type : 'input',
                             label : 'E-mail',
-                            placeholder : 'Leaving empty will leave password the same.',
                         },
                         password : {
                             name : 'password',
@@ -66,13 +67,40 @@
                             label : 'Role',
                         },
                     },
+                    'add' : {
+                        nickname : {
+                            name : 'nickname',
+                            type : 'input',
+                            label : 'Nickname',
+                        },
+                        email : {
+                            name : 'email',
+                            type : 'input',
+                            label : 'E-mail',
+                        },
+                        password : {
+                            name : 'password',
+                            type : 'input',
+                            label : 'Password'
+                        },
+                        role : {
+                            name : 'role',
+                            type : 'select',
+                            label : 'Role',
+                        },
+                        referral : {
+                            name : 'referral',
+                            type : 'input',
+                            label : 'Referral',
+                        },
+                    },
                     user : {},
                 },
             }
         },
         watch : {
         },
-        created() {this.modalInputs['edit']['role']['options'] = this.roles;
+        created() {
             this.fetchUsers();
             this.fetchRoles();
         },
@@ -83,8 +111,15 @@
             userId() {
                 return this.selectedAction.split('-')[1];
             },
-            editTitle() {
-              return `Edit user ${this.modalInputs['user']['nickname']}`
+            title() {
+                switch(this.action) {
+                    case 'add':
+                        return 'Create a new User';
+                    case 'edit':
+                        return `Edit user ${this.modalInputs['user']['nickname']}`
+                    default:
+                        return '';
+                }
             },
         },
         methods : {
@@ -117,7 +152,7 @@
                                roles[val.id] = val;
                             });
                             this.roles = roles;
-                            this.modalInputs['edit']['role']['options'] = roles;
+                            this.modalInputs['edit']['role']['options'] = this.modalInputs['add']['role']['options'] = roles;
                         }
                     )
                     .catch(error => this.error = error)

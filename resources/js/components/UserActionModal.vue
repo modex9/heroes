@@ -14,7 +14,7 @@
                             <label v-bind:for="input['name']">{{input['label']}}</label>
                             <input v-if="input['type'] == 'input'" type="text" class="form-control" :class="{ 'is-invalid' : input['name'] in modalErrors}" v-bind:name="input['name']"
                                    v-bind:id="input['name']" v-model="data[input['name']]" required>
-                            <select v-model="data[input['name']]" v-else-if="input['type'] == 'select'" v-bind:name="input['name']" v-bind:id="input['name']">
+                            <select v-model="data[input['name']]" v-else-if="input['type'] == 'select'" :class="{ 'is-invalid' : input['name'] in modalErrors}" v-bind:name="input['name']" v-bind:id="input['name']">
                                 <option v-for="option in input['options']" v-bind:value="option['id']">{{option['name']}}</option>
                             </select>
                             <span v-if="input['name'] in modalErrors" class="invalid-feedback" role="alert">
@@ -30,7 +30,7 @@
 
                 </div>
                 <button v-if="!actionSuccess" @click="handleAction()" class="btn btn-primary" type="submit">Save changes</button>
-                <button @click="actionSuccess = false" type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button @click="afterModalClosed" type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -59,9 +59,19 @@
                 this.modalErrors = {};
                 const keys = Object.keys(this.inputs);
                 keys.forEach((val) => {
-                    if(this.inputs[val]['type'] == 'select')
-                        Vue.set(this.data, val, this.user[`${val}_id`]);
-                    else Vue.set(this.data, val, this.user[val]);
+                    if(this.inputs[val]['type'] == 'select') {
+                        if(this.user !== undefined && this.user) {
+                            Vue.set(this.data, val, this.user[`${val}_id`]);
+                        }
+                        else {
+                            Vue.set(this.data, val, 1);
+                        }
+                    }
+                    else if (this.user !== undefined)
+                        Vue.set(this.data, val, this.user[val]);
+                    else
+                        Vue.set(this.data, val, '');
+
                 });
             },
 
@@ -70,17 +80,24 @@
             modalId() {
                 return `${this.action}-modal`;
             },
-            // formId() {
-            //     return `${this.action}Form`;
-            // },
             route() {
                 if(this.action.includes('edit'))
-                    return `${document.location.href}/${this.user['id']}`
+                    return `${document.location.href}/${this.user['id']}`;
+                else if(this.action.includes('add'))
+                    return document.location.href;
+            },
+            method() {
+                if(this.action.includes('edit'))
+                    return 'PUT';
+                else if(this.action.includes('add'))
+                    return 'POST';
             },
             successMessage() {
                 switch (this.action.split('-')[0]) {
-                    case'edit' :
+                    case 'edit' :
                         return `User ${this.user['nickname']} was successfully updated.`;
+                    case 'add' :
+                        return `New User ${this.data['nickname']} was successfully created.`;
                     default :
                         return '';
                 }
@@ -91,11 +108,12 @@
                 this.modalErrors = {};
                 this.data['id'] = this.user['id'];
                 fetch(this.route, {
-                    method : "PUT",
+                    method : this.method,
                     body : JSON.stringify(this.data),
                     headers : {
                         "Content-Type": "application/json; charset=utf-8",
                         'X-CSRF-TOKEN' : $('meta[name="csrf-token"]').attr('content'),
+                        'cache' : 'no-store',
                     },
                 })
                 .then(data => data.json())
@@ -109,6 +127,12 @@
                 })
                 .catch(error => console.log(error));
             },
+            afterModalClosed() {
+                this.actionSuccess = false;
+                this.data = {};
+                this.$emit('modal-closed', true);
+            },
+
         },
     }
 </script>

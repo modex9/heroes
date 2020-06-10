@@ -1935,6 +1935,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -1962,8 +1964,7 @@ __webpack_require__.r(__webpack_exports__);
           email: {
             name: 'email',
             type: 'input',
-            label: 'E-mail',
-            placeholder: 'Leaving empty will leave password the same.'
+            label: 'E-mail'
           },
           password: {
             name: 'password',
@@ -1976,13 +1977,39 @@ __webpack_require__.r(__webpack_exports__);
             label: 'Role'
           }
         },
+        'add': {
+          nickname: {
+            name: 'nickname',
+            type: 'input',
+            label: 'Nickname'
+          },
+          email: {
+            name: 'email',
+            type: 'input',
+            label: 'E-mail'
+          },
+          password: {
+            name: 'password',
+            type: 'input',
+            label: 'Password'
+          },
+          role: {
+            name: 'role',
+            type: 'select',
+            label: 'Role'
+          },
+          referral: {
+            name: 'referral',
+            type: 'input',
+            label: 'Referral'
+          }
+        },
         user: {}
       }
     };
   },
   watch: {},
   created: function created() {
-    this.modalInputs['edit']['role']['options'] = this.roles;
     this.fetchUsers();
     this.fetchRoles();
   },
@@ -1993,8 +2020,17 @@ __webpack_require__.r(__webpack_exports__);
     userId: function userId() {
       return this.selectedAction.split('-')[1];
     },
-    editTitle: function editTitle() {
-      return "Edit user ".concat(this.modalInputs['user']['nickname']);
+    title: function title() {
+      switch (this.action) {
+        case 'add':
+          return 'Create a new User';
+
+        case 'edit':
+          return "Edit user ".concat(this.modalInputs['user']['nickname']);
+
+        default:
+          return '';
+      }
     }
   },
   methods: {
@@ -2030,7 +2066,7 @@ __webpack_require__.r(__webpack_exports__);
           roles[val.id] = val;
         });
         _this2.roles = roles;
-        _this2.modalInputs['edit']['role']['options'] = roles;
+        _this2.modalInputs['edit']['role']['options'] = _this2.modalInputs['add']['role']['options'] = roles;
       })["catch"](function (error) {
         return _this2.error = error;
       }).then(function () {
@@ -2125,7 +2161,13 @@ __webpack_require__.r(__webpack_exports__);
       this.modalErrors = {};
       var keys = Object.keys(this.inputs);
       keys.forEach(function (val) {
-        if (_this2.inputs[val]['type'] == 'select') Vue.set(_this2.data, val, _this2.user["".concat(val, "_id")]);else Vue.set(_this2.data, val, _this2.user[val]);
+        if (_this2.inputs[val]['type'] == 'select') {
+          if (_this2.user !== undefined && _this2.user) {
+            Vue.set(_this2.data, val, _this2.user["".concat(val, "_id")]);
+          } else {
+            Vue.set(_this2.data, val, 1);
+          }
+        } else if (_this2.user !== undefined) Vue.set(_this2.data, val, _this2.user[val]);else Vue.set(_this2.data, val, '');
       });
     }
   },
@@ -2133,16 +2175,19 @@ __webpack_require__.r(__webpack_exports__);
     modalId: function modalId() {
       return "".concat(this.action, "-modal");
     },
-    // formId() {
-    //     return `${this.action}Form`;
-    // },
     route: function route() {
-      if (this.action.includes('edit')) return "".concat(document.location.href, "/").concat(this.user['id']);
+      if (this.action.includes('edit')) return "".concat(document.location.href, "/").concat(this.user['id']);else if (this.action.includes('add')) return document.location.href;
+    },
+    method: function method() {
+      if (this.action.includes('edit')) return 'PUT';else if (this.action.includes('add')) return 'POST';
     },
     successMessage: function successMessage() {
       switch (this.action.split('-')[0]) {
         case 'edit':
           return "User ".concat(this.user['nickname'], " was successfully updated.");
+
+        case 'add':
+          return "New User ".concat(this.data['nickname'], " was successfully created.");
 
         default:
           return '';
@@ -2156,11 +2201,12 @@ __webpack_require__.r(__webpack_exports__);
       this.modalErrors = {};
       this.data['id'] = this.user['id'];
       fetch(this.route, {
-        method: "PUT",
+        method: this.method,
         body: JSON.stringify(this.data),
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+          'cache': 'no-store'
         }
       }).then(function (data) {
         return data.json();
@@ -2173,6 +2219,11 @@ __webpack_require__.r(__webpack_exports__);
       })["catch"](function (error) {
         return console.log(error);
       });
+    },
+    afterModalClosed: function afterModalClosed() {
+      this.actionSuccess = false;
+      this.data = {};
+      this.$emit('modal-closed', true);
     }
   }
 });
@@ -37919,16 +37970,34 @@ var render = function() {
     ]),
     _vm._v(" "),
     _c(
+      "a",
+      {
+        attrs: { id: "add-user" },
+        on: {
+          click: function($event) {
+            _vm.selectedAction = "add"
+          }
+        }
+      },
+      [_vm._v("Add new User")]
+    ),
+    _vm._v(" "),
+    _c(
       "div",
       [
         _c("user-action-modal", {
           attrs: {
-            title: _vm.editTitle,
+            title: _vm.title,
             inputs: _vm.inputFields(),
             user: _vm.modalInputs["user"],
             action: _vm.selectedAction
           },
-          on: { "user-updated": _vm.updateUser }
+          on: {
+            "user-updated": _vm.updateUser,
+            "modal-closed": function($event) {
+              _vm.selectedAction = ""
+            }
+          }
         })
       ],
       1
@@ -38037,6 +38106,9 @@ var render = function() {
                                   expression: "data[input['name']]"
                                 }
                               ],
+                              class: {
+                                "is-invalid": input["name"] in _vm.modalErrors
+                              },
                               attrs: { name: input["name"], id: input["name"] },
                               on: {
                                 change: function($event) {
@@ -38122,11 +38194,7 @@ var render = function() {
             {
               staticClass: "btn btn-secondary",
               attrs: { type: "button", "data-dismiss": "modal" },
-              on: {
-                click: function($event) {
-                  _vm.actionSuccess = false
-                }
-              }
+              on: { click: _vm.afterModalClosed }
             },
             [_vm._v("Close")]
           )

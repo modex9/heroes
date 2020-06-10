@@ -5,6 +5,7 @@ namespace App;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Validation\Rule;
 
 class User extends Authenticatable
 {
@@ -63,6 +64,27 @@ class User extends Authenticatable
         $ban = $this->bans->last();
         $bandEndsSeconds =  strtotime($ban->created_at) + $ban->duration * 3600 - strtotime('now') - 3600*3;
         return $bandEndsSeconds > 0;
+    }
+
+    public static function getRules($user = null) {
+        $rules = [
+            'nickname' => [
+                'required',
+                'min:4',
+                'max:15',
+            ],
+            'email' => [
+                'required',
+                'max:50',
+                'email',
+            ],
+            'role' => 'integer|between:1,3|required',
+            'id' => 'integer',
+        ];
+        if($user)
+            $rules['nickname'][] = $rules['email'][] = Rule::unique('users')->ignore($user->id);
+
+        return $rules;
     }
 
 }
