@@ -18,7 +18,7 @@
         </table>
         <a @click="selectedAction = 'add'" id="add-user">Add new User</a>
         <div>
-            <user-action-modal @user-updated="updateUser" @user-deleted="deleteUser" :title="title" :inputs="inputFields()" @modal-closed="selectedAction = ''" :user="modalInputs['user']"
+            <user-action-modal @user-updated="updateOrCreateUser" @user-deleted="deleteUser" :title="title" :inputs="inputFields()" @modal-closed="selectedAction = ''" :user="modalInputs['user']"
                                :action="selectedAction"></user-action-modal>
         </div>
     </div>
@@ -177,7 +177,8 @@
                     this.modalInputs['user'] = this.users[this.userId];
                 return this.modalInputs[this.action];
             },
-            updateUser(user) {
+            //Save update or new user
+            updateOrCreateUser(user) {
                 this.users[user['id']] = user;
             },
             deleteUser(user) {

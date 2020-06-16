@@ -2089,7 +2089,8 @@ __webpack_require__.r(__webpack_exports__);
       if (this.action == 'edit' || this.action == 'delete') this.modalInputs['user'] = this.users[this.userId];
       return this.modalInputs[this.action];
     },
-    updateUser: function updateUser(user) {
+    //Save update or new user
+    updateOrCreateUser: function updateOrCreateUser(user) {
       this.users[user['id']] = user;
     },
     deleteUser: function deleteUser(user) {
@@ -2200,7 +2201,7 @@ __webpack_require__.r(__webpack_exports__);
       if (this.action.includes('edit')) return 'PUT';else if (this.action.includes('add')) return 'POST';else if (this.action.includes('delete')) return 'DELETE';
     },
     successMessage: function successMessage() {
-      switch (this.action.split('-')[0]) {
+      switch (this.actionName) {
         case 'edit':
           return "User ".concat(this.user['nickname'], " was successfully updated.");
 
@@ -2218,13 +2219,16 @@ __webpack_require__.r(__webpack_exports__);
       if (this.action.includes('delete')) return 'Confirm Deletion';else return 'Save';
     },
     modalAlert: function modalAlert() {
-      switch (this.action.split('-')[0]) {
+      switch (this.actionName) {
         case 'delete':
           return "Are you sure you want to delete user ".concat(this.user['nickname'], "?");
 
         default:
           return '';
       }
+    },
+    actionName: function actionName() {
+      return this.action.split('-')[0];
     }
   },
   methods: {
@@ -2245,7 +2249,7 @@ __webpack_require__.r(__webpack_exports__);
         return data.json();
       }).then(function (data) {
         if (!data['success']) _this3.modalErrors = data['errors'];else {
-          if (_this3.action.split('-')[0] == 'edit') _this3.$emit('user-updated', data['user']);else if (_this3.action.split('-')[0] == 'delete') _this3.$emit('user-deleted', _this3.user);
+          if (_this3.actionName == 'edit' || _this3.actionName == 'add') _this3.$emit('user-updated', data['user']);else if (_this3.actionName == 'delete') _this3.$emit('user-deleted', _this3.user);
           _this3.actionSuccess = true;
         }
         if (data['error']) _this3.deletionError = data['error'];
@@ -38027,7 +38031,7 @@ var render = function() {
             action: _vm.selectedAction
           },
           on: {
-            "user-updated": _vm.updateUser,
+            "user-updated": _vm.updateOrCreateUser,
             "user-deleted": _vm.deleteUser,
             "modal-closed": function($event) {
               _vm.selectedAction = ""

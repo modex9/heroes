@@ -101,7 +101,7 @@
                     return 'DELETE';
             },
             successMessage() {
-                switch (this.action.split('-')[0]) {
+                switch (this.actionName) {
                     case 'edit' :
                         return `User ${this.user['nickname']} was successfully updated.`;
                     case 'add' :
@@ -119,12 +119,15 @@
                     return 'Save';
             },
             modalAlert() {
-                switch (this.action.split('-')[0]) {
+                switch (this.actionName) {
                     case 'delete' :
                         return `Are you sure you want to delete user ${this.user['nickname']}?`;
                     default :
                         return '';
                 }
+            },
+            actionName() {
+              return this.action.split('-')[0];
             },
         },
         methods : {
@@ -145,9 +148,9 @@
                     if(!data['success'])
                         this.modalErrors = data['errors'];
                     else {
-                        if(this.action.split('-')[0] == 'edit')
+                        if(this.actionName == 'edit' || this.actionName == 'add')
                             this.$emit('user-updated', data['user']);
-                        else if(this.action.split('-')[0] == 'delete')
+                        else if(this.actionName == 'delete')
                             this.$emit('user-deleted', this.user);
                         this.actionSuccess = true;
                     }
