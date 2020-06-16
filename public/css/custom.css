@@ -54,3 +54,9 @@ tr.banned {
     background: #cbcde6;
     border-radius: 5px;
 }
+
+.modal-alert {
+    font-weight: bold;
+    font-size: 20px;
+    margin: 1em 0;
+}

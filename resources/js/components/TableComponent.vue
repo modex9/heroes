@@ -18,7 +18,7 @@
         </table>
         <a @click="selectedAction = 'add'" id="add-user">Add new User</a>
         <div>
-            <user-action-modal @user-updated="updateUser" :title="title" :inputs="inputFields()" @modal-closed="selectedAction = ''" :user="modalInputs['user']"
+            <user-action-modal @user-updated="updateUser" @user-deleted="deleteUser" :title="title" :inputs="inputFields()" @modal-closed="selectedAction = ''" :user="modalInputs['user']"
                                :action="selectedAction"></user-action-modal>
         </div>
     </div>
@@ -94,6 +94,11 @@
                             label : 'Referral',
                         },
                     },
+                    delete : {
+                        alert : {
+                            type : 'text',
+                        }
+                    },
                     user : {},
                 },
             }
@@ -111,12 +116,15 @@
             userId() {
                 return this.selectedAction.split('-')[1];
             },
+            // Move to modal component ?
             title() {
                 switch(this.action) {
                     case 'add':
                         return 'Create a new User';
                     case 'edit':
                         return `Edit user ${this.modalInputs['user']['nickname']}`
+                    case 'delete':
+                        return `Delete user ${this.modalInputs['user']['nickname']}`
                     default:
                         return '';
                 }
@@ -165,12 +173,15 @@
                 this.selectedAction = value;
             },
             inputFields() {
-                if (this.action == 'edit')
+                if (this.action == 'edit' || this.action == 'delete')
                     this.modalInputs['user'] = this.users[this.userId];
                 return this.modalInputs[this.action];
             },
             updateUser(user) {
                 this.users[user['id']] = user;
+            },
+            deleteUser(user) {
+                delete this.users[user['id']];
             }
         }
     }

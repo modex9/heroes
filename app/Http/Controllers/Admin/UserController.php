@@ -118,16 +118,25 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        if(Auth::user()->id !== $user->id) {
+        $response = [];
+        if(!$user) {
+            $response['error'] = 'Request failed: user is not valid';
+        }
+        elseif(Auth::user()->id == $user->id) {
+            $response['error'] = 'Can\'t delete yourself.';
+        }
+        //todo: apsirasyt constanta
+        elseif($user->role->id == 1) {
+            $response['error'] = 'Can\'t delete admin.';
+        }
+
+        if(!isset($response['error'])) {
             $user->delete();
-            $response = array(
-                'status' => true
-            );
+            $response['success'] = true;
         }
         else
-            $response = array(
-                'status' => false
-            );
+            $response['success'] = false;
+
         return response()->json($response);
     }
 

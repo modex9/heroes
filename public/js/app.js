@@ -2004,6 +2004,11 @@ __webpack_require__.r(__webpack_exports__);
             label: 'Referral'
           }
         },
+        "delete": {
+          alert: {
+            type: 'text'
+          }
+        },
         user: {}
       }
     };
@@ -2020,6 +2025,7 @@ __webpack_require__.r(__webpack_exports__);
     userId: function userId() {
       return this.selectedAction.split('-')[1];
     },
+    // Move to modal component ?
     title: function title() {
       switch (this.action) {
         case 'add':
@@ -2027,6 +2033,9 @@ __webpack_require__.r(__webpack_exports__);
 
         case 'edit':
           return "Edit user ".concat(this.modalInputs['user']['nickname']);
+
+        case 'delete':
+          return "Delete user ".concat(this.modalInputs['user']['nickname']);
 
         default:
           return '';
@@ -2077,11 +2086,14 @@ __webpack_require__.r(__webpack_exports__);
       this.selectedAction = value;
     },
     inputFields: function inputFields() {
-      if (this.action == 'edit') this.modalInputs['user'] = this.users[this.userId];
+      if (this.action == 'edit' || this.action == 'delete') this.modalInputs['user'] = this.users[this.userId];
       return this.modalInputs[this.action];
     },
     updateUser: function updateUser(user) {
       this.users[user['id']] = user;
+    },
+    deleteUser: function deleteUser(user) {
+      delete this.users[user['id']];
     }
   }
 });
@@ -2135,6 +2147,11 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "UserActionModal",
   props: ['action', 'visible', 'inputs', 'user', 'title'],
@@ -2143,7 +2160,8 @@ __webpack_require__.r(__webpack_exports__);
       id: '',
       data: {},
       modalErrors: {},
-      actionSuccess: false
+      actionSuccess: false,
+      deletionError: false
     };
   },
   watch: {
@@ -2176,10 +2194,10 @@ __webpack_require__.r(__webpack_exports__);
       return "".concat(this.action, "-modal");
     },
     route: function route() {
-      if (this.action.includes('edit')) return "".concat(document.location.href, "/").concat(this.user['id']);else if (this.action.includes('add')) return document.location.href;
+      if (this.action.includes('edit') || this.action.includes('delete')) return "".concat(document.location.href, "/").concat(this.user['id']);else if (this.action.includes('add')) return document.location.href;
     },
     method: function method() {
-      if (this.action.includes('edit')) return 'PUT';else if (this.action.includes('add')) return 'POST';
+      if (this.action.includes('edit')) return 'PUT';else if (this.action.includes('add')) return 'POST';else if (this.action.includes('delete')) return 'DELETE';
     },
     successMessage: function successMessage() {
       switch (this.action.split('-')[0]) {
@@ -2188,6 +2206,21 @@ __webpack_require__.r(__webpack_exports__);
 
         case 'add':
           return "New User ".concat(this.data['nickname'], " was successfully created.");
+
+        case 'delete':
+          return "User ".concat(this.user['nickname'], " was successfully deleted.");
+
+        default:
+          return '';
+      }
+    },
+    buttonText: function buttonText() {
+      if (this.action.includes('delete')) return 'Confirm Deletion';else return 'Save';
+    },
+    modalAlert: function modalAlert() {
+      switch (this.action.split('-')[0]) {
+        case 'delete':
+          return "Are you sure you want to delete user ".concat(this.user['nickname'], "?");
 
         default:
           return '';
@@ -2212,16 +2245,17 @@ __webpack_require__.r(__webpack_exports__);
         return data.json();
       }).then(function (data) {
         if (!data['success']) _this3.modalErrors = data['errors'];else {
-          _this3.$emit('user-updated', data['user']);
-
+          if (_this3.action.split('-')[0] == 'edit') _this3.$emit('user-updated', data['user']);else if (_this3.action.split('-')[0] == 'delete') _this3.$emit('user-deleted', _this3.user);
           _this3.actionSuccess = true;
         }
+        if (data['error']) _this3.deletionError = data['error'];
       })["catch"](function (error) {
         return console.log(error);
       });
     },
     afterModalClosed: function afterModalClosed() {
       this.actionSuccess = false;
+      this.deletionError = false;
       this.data = {};
       this.$emit('modal-closed', true);
     }
@@ -37994,6 +38028,7 @@ var render = function() {
           },
           on: {
             "user-updated": _vm.updateUser,
+            "user-deleted": _vm.deleteUser,
             "modal-closed": function($event) {
               _vm.selectedAction = ""
             }
@@ -38056,9 +38091,11 @@ var render = function() {
                   { attrs: { id: "before-send" } },
                   _vm._l(_vm.inputs, function(input) {
                     return _c("div", { staticClass: "form-group" }, [
-                      _c("label", { attrs: { for: input["name"] } }, [
-                        _vm._v(_vm._s(input["label"]))
-                      ]),
+                      input["type"] !== "text"
+                        ? _c("label", { attrs: { for: input["name"] } }, [
+                            _vm._v(_vm._s(input["label"]))
+                          ])
+                        : _vm._e(),
                       _vm._v(" "),
                       input["type"] == "input"
                         ? _c("input", {
@@ -38140,9 +38177,13 @@ var render = function() {
                             }),
                             0
                           )
+                        : input["type"] == "text"
+                        ? _c("p", { staticClass: "modal-alert" }, [
+                            _vm._v(_vm._s(_vm.modalAlert))
+                          ])
                         : _vm._e(),
                       _vm._v(" "),
-                      input["name"] in _vm.modalErrors
+                      !!input["name"] && input["name"] in _vm.modalErrors
                         ? _c(
                             "span",
                             {
@@ -38164,11 +38205,17 @@ var render = function() {
                 )
               : _c("div", { attrs: { id: "action-success" } }, [
                   _vm._v(
-                    "\n                    " +
+                    "\n                        " +
                       _vm._s(_vm.successMessage) +
-                      "\n                "
+                      "\n                    "
                   )
+                ]),
+            _vm._v(" "),
+            !!_vm.deletionError
+              ? _c("div", { staticClass: "alert-danger" }, [
+                  _vm._v(_vm._s(_vm.deletionError))
                 ])
+              : _vm._e()
           ]),
           _vm._v(" "),
           _c("div", { staticClass: "modal-footer" }),
@@ -38178,14 +38225,14 @@ var render = function() {
                 "button",
                 {
                   staticClass: "btn btn-primary",
-                  attrs: { type: "submit" },
+                  attrs: { type: "submit", disabled: _vm.deletionError },
                   on: {
                     click: function($event) {
                       return _vm.handleAction()
                     }
                   }
                 },
-                [_vm._v("Save changes")]
+                [_vm._v(_vm._s(_vm.buttonText))]
               )
             : _vm._e(),
           _vm._v(" "),

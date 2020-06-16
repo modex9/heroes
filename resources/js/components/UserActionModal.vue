@@ -1,5 +1,5 @@
 <template>
-    <div class="modal fade" v-bind:id="id" tabindex="-1" role="dialog" aria-labelledby="l" aria-hidden="true">
+    <div class="modal fade" :id="id" tabindex="-1" role="dialog" aria-labelledby="l" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -11,13 +11,17 @@
                 <div class="modal-body">
                     <div v-if="!actionSuccess" id="before-send">
                         <div class="form-group" v-for="input in inputs">
-                            <label v-bind:for="input['name']">{{input['label']}}</label>
-                            <input v-if="input['type'] == 'input'" type="text" class="form-control" :class="{ 'is-invalid' : input['name'] in modalErrors}" v-bind:name="input['name']"
-                                   v-bind:id="input['name']" v-model="data[input['name']]" required>
-                            <select v-model="data[input['name']]" v-else-if="input['type'] == 'select'" :class="{ 'is-invalid' : input['name'] in modalErrors}" v-bind:name="input['name']" v-bind:id="input['name']">
-                                <option v-for="option in input['options']" v-bind:value="option['id']">{{option['name']}}</option>
+                            <label v-if="input['type'] !== 'text'" :for="input['name']">{{input['label']}}</label>
+<!--                            simple inputs-->
+                            <input v-if="input['type'] == 'input'" type="text" class="form-control" :class="{ 'is-invalid' : input['name'] in modalErrors}" :name="input['name']"
+                                   :id="input['name']" v-model="data[input['name']]" required>
+<!--                            select inputs-->
+                            <select v-model="data[input['name']]" v-else-if="input['type'] == 'select'" :class="{ 'is-invalid' : input['name'] in modalErrors}" :name="input['name']" :id="input['name']">
+                                <option v-for="option in input['options']" :value="option['id']">{{option['name']}}</option>
                             </select>
-                            <span v-if="input['name'] in modalErrors" class="invalid-feedback" role="alert">
+<!--                            text messages-->
+                            <p class="modal-alert" v-else-if="input['type'] == 'text'">{{modalAlert}}</p>
+                            <span v-if="!!input['name'] && input['name'] in modalErrors" class="invalid-feedback" role="alert">
                                         <strong>{{modalErrors[input['name']][0]}}</strong>
                             </span>
                         </div>
@@ -25,11 +29,12 @@
                     <div id="action-success" v-else>
                         {{successMessage}}
                     </div>
+                    <div v-if="!!deletionError" class="alert-danger">{{deletionError}}</div>
                 </div>
                 <div class="modal-footer">
 
                 </div>
-                <button v-if="!actionSuccess" @click="handleAction()" class="btn btn-primary" type="submit">Save changes</button>
+                <button v-if="!actionSuccess" @click="handleAction()" class="btn btn-primary" type="submit" :disabled="deletionError">{{buttonText}}</button>
                 <button @click="afterModalClosed" type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
         </div>
@@ -46,6 +51,7 @@
                 data : {},
                 modalErrors : {},
                 actionSuccess : false,
+                deletionError : false,
             }
         },
         watch : {
@@ -81,16 +87,18 @@
                 return `${this.action}-modal`;
             },
             route() {
-                if(this.action.includes('edit'))
+                if (this.action.includes('edit') || this.action.includes('delete'))
                     return `${document.location.href}/${this.user['id']}`;
-                else if(this.action.includes('add'))
+                else if (this.action.includes('add'))
                     return document.location.href;
             },
             method() {
-                if(this.action.includes('edit'))
+                if (this.action.includes('edit'))
                     return 'PUT';
-                else if(this.action.includes('add'))
+                else if (this.action.includes('add'))
                     return 'POST';
+                else if (this.action.includes('delete'))
+                    return 'DELETE';
             },
             successMessage() {
                 switch (this.action.split('-')[0]) {
@@ -98,10 +106,26 @@
                         return `User ${this.user['nickname']} was successfully updated.`;
                     case 'add' :
                         return `New User ${this.data['nickname']} was successfully created.`;
+                    case 'delete' :
+                        return `User ${this.user['nickname']} was successfully deleted.`;
                     default :
                         return '';
                 }
-            }
+            },
+            buttonText() {
+                if (this.action.includes('delete'))
+                    return 'Confirm Deletion';
+                else
+                    return 'Save';
+            },
+            modalAlert() {
+                switch (this.action.split('-')[0]) {
+                    case 'delete' :
+                        return `Are you sure you want to delete user ${this.user['nickname']}?`;
+                    default :
+                        return '';
+                }
+            },
         },
         methods : {
             handleAction() {
@@ -121,14 +145,20 @@
                     if(!data['success'])
                         this.modalErrors = data['errors'];
                     else {
-                        this.$emit('user-updated', data['user']);
+                        if(this.action.split('-')[0] == 'edit')
+                            this.$emit('user-updated', data['user']);
+                        else if(this.action.split('-')[0] == 'delete')
+                            this.$emit('user-deleted', this.user);
                         this.actionSuccess = true;
                     }
+                    if(data['error'])
+                        this.deletionError = data['error'];
                 })
                 .catch(error => console.log(error));
             },
             afterModalClosed() {
                 this.actionSuccess = false;
+                this.deletionError = false;
                 this.data = {};
                 this.$emit('modal-closed', true);
             },
