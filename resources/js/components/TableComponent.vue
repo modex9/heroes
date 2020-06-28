@@ -7,7 +7,7 @@
             <tr v-if="loading"><td colspan="5">Loading...</td></tr>
             <div v-if="error">{{error}}</div>
             <tbody v-if="users && roles">
-            <tr v-for="user in users">
+            <tr v-for="user in users" :class="{ 'banned' : user['banned']}">
                 <td>{{user.nickname}}</td>
                 <td>{{user.email}}</td>
                 <td>{{user.referral}}</td>
@@ -18,7 +18,7 @@
         </table>
         <a @click="selectedAction = 'add'" id="add-user">Add new User</a>
         <div>
-            <user-action-modal @user-updated="updateOrCreateUser" @user-deleted="deleteUser" :title="title" :inputs="inputFields()" @modal-closed="selectedAction = ''" :user="modalInputs['user']"
+            <user-action-modal @user-updated="updateOrCreateUser" @user-deleted="deleteUser" @user-banned="banUser" :title="title" :inputs="inputFields()" @modal-closed="selectedAction = ''" :user="modalInputs['user']"
                                :action="selectedAction"></user-action-modal>
         </div>
     </div>
@@ -32,7 +32,7 @@
 
     export default {
         name: "TableComponent",
-        props : ['usersRoute', 'rolesRoute'],
+        props : ['usersRoute', 'rolesRoute', 'banTypesRoute'],
         components : {
             UserActions, UserActionModal
         },
@@ -42,6 +42,7 @@
                 users : null,
                 error : null,
                 roles : null,
+                banTypes : null,
                 headers : ['Nickname', 'E-mail', 'Referral', 'Role', 'Actions'],
                 selectedAction : '',
                 modalInputs : {
@@ -94,6 +95,23 @@
                             label : 'Referral',
                         },
                     },
+                    'ban' : {
+                        reason : {
+                            name : 'reason',
+                            type : 'input',
+                            label : 'Reason',
+                        },
+                        duration : {
+                            name : 'duration',
+                            type : 'input',
+                            label : 'Duration'
+                        },
+                        ban_type : {
+                            name : 'ban_type',
+                            type : 'select',
+                            label : 'Type',
+                        },
+                    },
                     delete : {
                         alert : {
                             type : 'text',
@@ -108,6 +126,7 @@
         created() {
             this.fetchUsers();
             this.fetchRoles();
+            this.fetchBanTypes();
         },
         computed : {
             action() {
@@ -125,6 +144,8 @@
                         return `Edit user ${this.modalInputs['user']['nickname']}`
                     case 'delete':
                         return `Delete user ${this.modalInputs['user']['nickname']}`
+                    case 'ban':
+                        return `Ban user ${this.modalInputs['user']['nickname']}`
                     default:
                         return '';
                 }
@@ -169,11 +190,30 @@
                             this.loading = false;
                     });
             },
+            fetchBanTypes() {
+                this.error = this.banTypes = null;
+                let banTypes = {};
+                this.loading = true;
+                fetch(this.banTypesRoute)
+                    .then(data => data.json())
+                    .then(data => {
+                        data.forEach(val => {
+                           banTypes[val.id] = val;
+                        });
+                        this.banTypes = banTypes;
+                        this.modalInputs['ban']['ban_type']['options'] = banTypes;
+                    })
+                    .catch(error => this.error = error)
+                    .then(() => {
+                       if(this.banTypes)
+                           this.loading = false;
+                    });
+            },
             updateSelected(value) {
                 this.selectedAction = value;
             },
             inputFields() {
-                if (this.action == 'edit' || this.action == 'delete')
+                if (this.action == 'edit' || this.action == 'delete' || this.action.includes('ban'))
                     this.modalInputs['user'] = this.users[this.userId];
                 return this.modalInputs[this.action];
             },
@@ -183,6 +223,9 @@
             },
             deleteUser(user) {
                 delete this.users[user['id']];
+            },
+            banUser(user) {
+                this.users[user['id']]['banned'] = true;
             }
         }
     }

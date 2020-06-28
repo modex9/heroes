@@ -36,7 +36,7 @@
         </table>
     </div>
     <div id="app">
-        <table-component users-route="{{route('fetchUsers')}}" roles-route="{{route('fetchRoles')}}"></table-component>
+        <table-component users-route="{{route('fetchUsers')}}" roles-route="{{route('fetchRoles')}}" ban-types-route="{{route('fetchBantypes')}}"></table-component>
     </div>
     <script type="application/javascript" src="{{asset('js/app.js')}}"></script>
 

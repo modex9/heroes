@@ -91,11 +91,13 @@
                     return `${document.location.href}/${this.user['id']}`;
                 else if (this.action.includes('add'))
                     return document.location.href;
+                else if (this.action.startsWith('ban'))
+                    return `${window.origin}/public/ban/${this.user['id']}`;
             },
             method() {
                 if (this.action.includes('edit'))
                     return 'PUT';
-                else if (this.action.includes('add'))
+                else if (this.action.includes('add') || this.action.startsWith('ban'))
                     return 'POST';
                 else if (this.action.includes('delete'))
                     return 'DELETE';
@@ -108,6 +110,8 @@
                         return `New User ${this.data['nickname']} was successfully created.`;
                     case 'delete' :
                         return `User ${this.user['nickname']} was successfully deleted.`;
+                    case 'delete' :
+                        return `User ${this.user['nickname']} was banned for ${this.data['duration']}.`;
                     default :
                         return '';
                 }
@@ -115,6 +119,8 @@
             buttonText() {
                 if (this.action.includes('delete'))
                     return 'Confirm Deletion';
+                else if (this.action.startsWith('ban'))
+                    return 'Ban User';
                 else
                     return 'Save';
             },
@@ -152,6 +158,8 @@
                             this.$emit('user-updated', data['user']);
                         else if(this.actionName == 'delete')
                             this.$emit('user-deleted', this.user);
+                        else if(this.actionName == 'ban')
+                            this.$emit('user-banned', this.user);
                         this.actionSuccess = true;
                     }
                     if(data['error'])

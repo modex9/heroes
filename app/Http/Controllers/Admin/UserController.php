@@ -141,7 +141,11 @@ class UserController extends Controller
     }
 
     public function getUsers() {
-        return json_encode(User::all());
+        $users = User::all();
+        foreach ($users as $user) {
+            $user->banned = $user->isBanned();
+        }
+        return json_encode($users);
     }
 
     public function getUserRules($user = null) {
