@@ -9,6 +9,8 @@ use App\BanType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
@@ -43,15 +45,19 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        if(!isset($request->nickname))
-            return back();
-        User::create([
+        $user_rules = $this->getUserRules();
+        $user_rules['password'] = 'string|min:6|max:16|required';
+        $not_validated = $this->validateUser($request, $user_rules);
+        if($not_validated)
+            return $not_validated;
+
+        $user = User::create([
             'nickname' => $request->nickname,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role_id' => $request->role
         ]);
-        return redirect('user');
+        return response()->json(array('success' => true, 'user' => $user), 200);
     }
 
     /**
@@ -73,8 +79,9 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        $roles = Role::all();
-        return view('user.edit', compact('user', 'roles'));
+
+//        $roles = Role::all();
+//        return view('user.edit', compact('user', 'roles'));
     }
 
     /**
@@ -86,11 +93,21 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
+        $user_rules = $this->getUserRules($user);
+        if($request->password)
+            $user_rules['password'] = 'string|min:6|max:16';
+        $not_validated = $this->validateUser($request, $user_rules);
+        if($not_validated)
+            return $not_validated;
+
         $user->nickname = $request->nickname;
         $user->email = $request->email;
         $user->role_id = $request->role;
+        //If validation was passed, the password is good
+        if($request->password)
+            $user->password = Hash::make($request->password);
         $user->save();
-        return redirect('user');
+        return response()->json(array('success' => true, 'user' => $user), 200);
     }
 
     /**
@@ -101,16 +118,51 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        if(Auth::user()->id !== $user->id) {
+        $response = [];
+        if(!$user) {
+            $response['error'] = 'Request failed: user is not valid';
+        }
+        elseif(Auth::user()->id == $user->id) {
+            $response['error'] = 'Can\'t delete yourself.';
+        }
+        //todo: apsirasyt constanta
+        elseif($user->role->id == 1) {
+            $response['error'] = 'Can\'t delete admin.';
+        }
+
+        if(!isset($response['error'])) {
             $user->delete();
-            $response = array(
-                'status' => true
-            );
+            $response['success'] = true;
         }
         else
-            $response = array(
-                'status' => false
-            );
+            $response['success'] = false;
+
         return response()->json($response);
+    }
+
+    public function getUsers() {
+        $users = User::all();
+        foreach ($users as $user) {
+            $user->banned = $user->isBanned();
+        }
+        return json_encode($users);
+    }
+
+    public function getUserRules($user = null) {
+        return User::getRules($user);
+    }
+
+    public function validateUser($request, $rules) {
+        $validator = Validator::make($request->all(), $rules);
+        // Validate the input and return correct response
+        if ($validator->fails())
+        {
+            return response()->json(array(
+                'success' => false,
+                'errors' => $validator->getMessageBag()->toArray()
+
+            ), 400); // 400 being the HTTP code for an invalid request.
+        }
+        else return false;
     }
 }
