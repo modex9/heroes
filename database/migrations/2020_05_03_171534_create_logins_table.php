@@ -18,7 +18,7 @@ class CreateLoginsTable extends Migration
             $table->tinyInteger('user_id');
             $table->string('ip', 39);
             $table->string('platform')->nullable();
-            $table->timestamp('created_at');
+            $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
         });
     }
 
