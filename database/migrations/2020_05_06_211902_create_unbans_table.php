@@ -18,7 +18,7 @@ class CreateUnbansTable extends Migration
             $table->integer('ban_id');
             $table->string('reason');
             $table->integer('issuer');
-            $table->timestamp('created_at');
+            $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
         });
     }
 

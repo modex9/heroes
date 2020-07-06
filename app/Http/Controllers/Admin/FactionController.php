@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
 use App\Faction;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Admin\AbstractAdminController;
 
-class FactionController extends Controller
+class FactionController extends AbstractAdminController
 {
     /**
      * Display a listing of the resource.

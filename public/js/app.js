@@ -2016,10 +2016,17 @@ __webpack_require__.r(__webpack_exports__);
             type: 'input',
             label: 'Duration'
           },
-          ban_type: {
-            name: 'ban_type',
+          type_id: {
+            name: 'type_id',
             type: 'select',
             label: 'Type'
+          }
+        },
+        'unban': {
+          reason: {
+            name: 'reason',
+            type: 'input',
+            label: 'Reason'
           }
         },
         "delete": {
@@ -2058,6 +2065,9 @@ __webpack_require__.r(__webpack_exports__);
 
         case 'ban':
           return "Ban user ".concat(this.modalInputs['user']['nickname']);
+
+        case 'unban':
+          return "Remove ban for user ".concat(this.modalInputs['user']['nickname']);
 
         default:
           return '';
@@ -2117,7 +2127,7 @@ __webpack_require__.r(__webpack_exports__);
           banTypes[val.id] = val;
         });
         _this3.banTypes = banTypes;
-        _this3.modalInputs['ban']['ban_type']['options'] = banTypes;
+        _this3.modalInputs['ban']['type_id']['options'] = banTypes;
       })["catch"](function (error) {
         return _this3.error = error;
       }).then(function () {
@@ -2139,7 +2149,7 @@ __webpack_require__.r(__webpack_exports__);
       delete this.users[user['id']];
     },
     banUser: function banUser(user) {
-      this.users[user['id']]['banned'] = true;
+      this.users[user['id']]['banned'] = user.banned;
     }
   }
 });
@@ -2240,10 +2250,10 @@ __webpack_require__.r(__webpack_exports__);
       return "".concat(this.action, "-modal");
     },
     route: function route() {
-      if (this.action.includes('edit') || this.action.includes('delete')) return "".concat(document.location.href, "/").concat(this.user['id']);else if (this.action.includes('add')) return document.location.href;else if (this.action.startsWith('ban')) return "".concat(window.origin, "/public/ban/").concat(this.user['id']);
+      if (this.action.includes('edit') || this.action.includes('delete')) return "".concat(document.location.href, "/").concat(this.user['id']);else if (this.action.includes('add')) return document.location.href;else if (this.action.startsWith('ban')) return "".concat(window.origin, "/public/ban/").concat(this.user['id']);else if (this.action.includes('ban')) return "".concat(window.origin, "/public/unban/").concat(this.user['id']);
     },
     method: function method() {
-      if (this.action.includes('edit')) return 'PUT';else if (this.action.includes('add') || this.action.startsWith('ban')) return 'POST';else if (this.action.includes('delete')) return 'DELETE';
+      if (this.action.includes('edit')) return 'PUT';else if (this.action.includes('add') || this.action.includes('ban')) return 'POST';else if (this.action.includes('delete')) return 'DELETE';
     },
     successMessage: function successMessage() {
       switch (this.actionName) {
@@ -2256,15 +2266,18 @@ __webpack_require__.r(__webpack_exports__);
         case 'delete':
           return "User ".concat(this.user['nickname'], " was successfully deleted.");
 
-        case 'delete':
+        case 'ban':
           return "User ".concat(this.user['nickname'], " was banned for ").concat(this.data['duration'], ".");
+
+        case 'unban':
+          return "User ".concat(this.user['nickname'], " was successfully unbanned.");
 
         default:
           return '';
       }
     },
     buttonText: function buttonText() {
-      if (this.action.includes('delete')) return 'Confirm Deletion';else if (this.action.startsWith('ban')) return 'Ban User';else return 'Save';
+      if (this.action.includes('delete')) return 'Confirm Deletion';else if (this.action.startsWith('ban')) return 'Ban User';else if (this.action.includes('unban')) return 'Remove Ban';else return 'Save';
     },
     modalAlert: function modalAlert() {
       switch (this.actionName) {
@@ -2283,8 +2296,9 @@ __webpack_require__.r(__webpack_exports__);
     handleAction: function handleAction() {
       var _this3 = this;
 
-      this.modalErrors = {};
-      this.data['id'] = this.user['id'];
+      this.modalErrors = {}; //If we are banning, we send user id in a different field name.
+
+      if (this.actionName.includes('ban')) this.data['user_id'] = this.user['id'];else this.data['id'] = this.user['id'];
       fetch(this.route, {
         method: this.method,
         body: JSON.stringify(this.data),
@@ -2297,7 +2311,11 @@ __webpack_require__.r(__webpack_exports__);
         return data.json();
       }).then(function (data) {
         if (!data['success']) _this3.modalErrors = data['errors'];else {
-          if (_this3.actionName == 'edit' || _this3.actionName == 'add') _this3.$emit('user-updated', data['user']);else if (_this3.actionName == 'delete') _this3.$emit('user-deleted', _this3.user);else if (_this3.actionName == 'ban') _this3.$emit('user-banned', _this3.user);
+          if (_this3.actionName == 'edit' || _this3.actionName == 'add') _this3.$emit('user-updated', data['user']);else if (_this3.actionName == 'delete') _this3.$emit('user-deleted', _this3.user);else if (_this3.actionName.includes('ban')) {
+            _this3.user.banned = _this3.actionName === 'ban';
+
+            _this3.$emit('user-banned', _this3.user);
+          }
           _this3.actionSuccess = true;
         }
         if (data['error']) _this3.deletionError = data['error'];
@@ -2335,7 +2353,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "UserActions",
-  props: ['userId'],
+  props: ['userId', 'userBanned'],
   data: function data() {
     return {
       selected: '',
@@ -38042,7 +38060,7 @@ var render = function() {
                   "td",
                   [
                     _c("user-actions", {
-                      attrs: { "user-id": user.id },
+                      attrs: { "user-id": user.id, "user-banned": user.banned },
                       on: { change: _vm.updateSelected }
                     })
                   ],
@@ -38378,9 +38396,18 @@ var render = function() {
         }
       },
       _vm._l(_vm.actions, function(action) {
-        return _c("option", { domProps: { value: _vm.formatAction(action) } }, [
-          _vm._v(_vm._s(action))
-        ])
+        return _c(
+          "option",
+          {
+            attrs: {
+              disabled:
+                (action === "Ban" && _vm.userBanned) ||
+                (action === "Unban" && !_vm.userBanned)
+            },
+            domProps: { value: _vm.formatAction(action) }
+          },
+          [_vm._v(_vm._s(action))]
+        )
       }),
       0
     )
@@ -50858,8 +50885,8 @@ __webpack_require__.r(__webpack_exports__);
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! /home/magnusten/public_html/lara.local/www/resources/js/app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! /home/magnusten/public_html/lara.local/www/resources/sass/app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! E:\wamp64\www\heroes\resources\js\app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! E:\wamp64\www\heroes\resources\sass\app.scss */"./resources/sass/app.scss");
 
 
 /***/ })
