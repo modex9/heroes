@@ -237,7 +237,7 @@
                 this.users[user['id']]['banned'] = user.banned;
             },
             getReferralName(refId) {
-                if(refId)
+                if(refId && this.users[refId] !== undefined)
                     return this.users[refId].nickname;
                 return '-';
             },
