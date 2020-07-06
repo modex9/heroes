@@ -2,17 +2,15 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
 use App\User;
 use App\Role;
 use App\BanType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
+use App\Http\Controllers\Admin\AbstractAdminController;
 
-class UserController extends Controller
+class UserController extends AbstractAdminController
 {
     /**
      * Display a listing of the resource.
@@ -45,9 +43,9 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        $user_rules = $this->getUserRules();
+        $user_rules = User::getRules(isset($user) ? $user : null);
         $user_rules['password'] = 'string|min:6|max:16|required';
-        $not_validated = $this->validateUser($request, $user_rules);
+        $not_validated = $this->validateData($request, $user_rules);
         if($not_validated)
             return $not_validated;
 
@@ -93,10 +91,10 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        $user_rules = $this->getUserRules($user);
+        $user_rules = User::getRules($user);
         if($request->password)
             $user_rules['password'] = 'string|min:6|max:16';
-        $not_validated = $this->validateUser($request, $user_rules);
+        $not_validated = $this->validateData($request, $user_rules);
         if($not_validated)
             return $not_validated;
 
@@ -146,23 +144,5 @@ class UserController extends Controller
             $user->banned = $user->isBanned();
         }
         return json_encode($users);
-    }
-
-    public function getUserRules($user = null) {
-        return User::getRules($user);
-    }
-
-    public function validateUser($request, $rules) {
-        $validator = Validator::make($request->all(), $rules);
-        // Validate the input and return correct response
-        if ($validator->fails())
-        {
-            return response()->json(array(
-                'success' => false,
-                'errors' => $validator->getMessageBag()->toArray()
-
-            ), 400); // 400 being the HTTP code for an invalid request.
-        }
-        else return false;
     }
 }

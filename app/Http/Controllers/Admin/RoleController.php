@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
 use App\Role;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Admin\AbstractAdminController;
 
-class RoleController extends Controller
+
+class RoleController extends AbstractAdminController
 {
     public function getRoles() {
         return json_encode(Role::all());

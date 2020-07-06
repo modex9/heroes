@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
 use App\Faction;
 use App\Hero;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Admin\AbstractAdminController;
 
-class HeroController extends Controller
+class HeroController extends AbstractAdminController
 {
     /**
      * Display a listing of the resource.

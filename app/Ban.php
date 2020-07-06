@@ -45,4 +45,20 @@ class Ban extends Model
     public function banIsValid() {
         return is_null($this->unban);
     }
+
+    public static function getRules() {
+         return [
+            'reason' => [
+                'required',
+                'min:5',
+                'max:200',
+            ],
+            'duration' => [
+                'required',
+                'gt:0',
+            ],
+            'type_id' => 'integer|between:1,2|required',
+            'user_id' => 'integer|required',
+        ];
+    }
 }
