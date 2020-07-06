@@ -20,7 +20,7 @@ class CreateBansTable extends Migration
             $table->string('reason');
             $table->integer('duration');
             $table->integer('issuer');
-            $table->timestamp('created_at');
+            $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
         });
     }
 

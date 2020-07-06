@@ -2016,8 +2016,8 @@ __webpack_require__.r(__webpack_exports__);
             type: 'input',
             label: 'Duration'
           },
-          ban_type: {
-            name: 'ban_type',
+          type_id: {
+            name: 'type_id',
             type: 'select',
             label: 'Type'
           }
@@ -2117,7 +2117,7 @@ __webpack_require__.r(__webpack_exports__);
           banTypes[val.id] = val;
         });
         _this3.banTypes = banTypes;
-        _this3.modalInputs['ban']['ban_type']['options'] = banTypes;
+        _this3.modalInputs['ban']['type_id']['options'] = banTypes;
       })["catch"](function (error) {
         return _this3.error = error;
       }).then(function () {
@@ -2283,8 +2283,9 @@ __webpack_require__.r(__webpack_exports__);
     handleAction: function handleAction() {
       var _this3 = this;
 
-      this.modalErrors = {};
-      this.data['id'] = this.user['id'];
+      this.modalErrors = {}; //If we are banning, we send user id in a different field name.
+
+      if (this.actionName.startsWith('ban')) this.data['user_id'] = this.user['id'];else this.data['id'] = this.user['id'];
       fetch(this.route, {
         method: this.method,
         body: JSON.stringify(this.data),
@@ -2335,7 +2336,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "UserActions",
-  props: ['userId'],
+  props: ['userId', 'userBanned'],
   data: function data() {
     return {
       selected: '',
@@ -38042,7 +38043,7 @@ var render = function() {
                   "td",
                   [
                     _c("user-actions", {
-                      attrs: { "user-id": user.id },
+                      attrs: { "user-id": user.id, "user-banned": user.banned },
                       on: { change: _vm.updateSelected }
                     })
                   ],
@@ -38378,9 +38379,18 @@ var render = function() {
         }
       },
       _vm._l(_vm.actions, function(action) {
-        return _c("option", { domProps: { value: _vm.formatAction(action) } }, [
-          _vm._v(_vm._s(action))
-        ])
+        return _c(
+          "option",
+          {
+            attrs: {
+              disabled:
+                (action === "Ban" && _vm.userBanned) ||
+                (action === "Unban" && !_vm.userBanned)
+            },
+            domProps: { value: _vm.formatAction(action) }
+          },
+          [_vm._v(_vm._s(action))]
+        )
       }),
       0
     )
@@ -50858,8 +50868,8 @@ __webpack_require__.r(__webpack_exports__);
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! /home/magnusten/public_html/lara.local/www/resources/js/app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! /home/magnusten/public_html/lara.local/www/resources/sass/app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! E:\wamp64\www\heroes\resources\js\app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! E:\wamp64\www\heroes\resources\sass\app.scss */"./resources/sass/app.scss");
 
 
 /***/ })

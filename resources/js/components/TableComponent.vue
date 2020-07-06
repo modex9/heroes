@@ -12,7 +12,7 @@
                 <td>{{user.email}}</td>
                 <td>{{user.referral}}</td>
                 <td>{{roles[user.role_id]['name']}}</td>
-                <td><user-actions @change="updateSelected"  :user-id="user.id"></user-actions></td>
+                <td><user-actions @change="updateSelected"  :user-id="user.id" :user-banned="user.banned"></user-actions></td>
             </tr>
             </tbody>
         </table>
@@ -106,8 +106,8 @@
                             type : 'input',
                             label : 'Duration'
                         },
-                        ban_type : {
-                            name : 'ban_type',
+                        type_id : {
+                            name : 'type_id',
                             type : 'select',
                             label : 'Type',
                         },
@@ -201,7 +201,7 @@
                            banTypes[val.id] = val;
                         });
                         this.banTypes = banTypes;
-                        this.modalInputs['ban']['ban_type']['options'] = banTypes;
+                        this.modalInputs['ban']['type_id']['options'] = banTypes;
                     })
                     .catch(error => this.error = error)
                     .then(() => {

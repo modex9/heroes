@@ -139,7 +139,11 @@
         methods : {
             handleAction() {
                 this.modalErrors = {};
-                this.data['id'] = this.user['id'];
+                //If we are banning, we send user id in a different field name.
+                if((this.actionName.startsWith('ban')))
+                    this.data['user_id'] = this.user['id'];
+                else
+                    this.data['id'] = this.user['id'];
                 fetch(this.route, {
                     method : this.method,
                     body : JSON.stringify(this.data),
