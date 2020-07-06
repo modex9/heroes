@@ -38,7 +38,3 @@ Route::get('banned', 'BannedController@bannedMessage')->name('banned');
 Route::post('ban/{user?}', 'Admin\BanController@execute')->name('ban.execute')->middleware(['auth', 'admin']);
 Route::get('bantypes', 'Admin\BanTypeController@getBanTypesAjax')->name('fetchBantypes')->middleware(['auth', 'admin']);
 Route::post('unban/{user?}', 'Admin\BanController@amend')->name('ban.amend')->middleware(['auth', 'admin']);
-Route::get('vue', 'HomeController@vue')->name('vue')->middleware('auth');
-Route::get('test', function () {
-    return ['x' => 500, 'y' => 250, 'z' => 256 +415, 'xx' => 'dieeeee'];
-})->name('vue');
