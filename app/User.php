@@ -83,6 +83,8 @@ class User extends Authenticatable
         ];
         if($user)
             $rules['nickname'][] = $rules['email'][] = Rule::unique('users')->ignore($user->id);
+        else
+            $rules['nickname'][] = $rules['email'][] = Rule::unique('users');
 
         return $rules;
     }
