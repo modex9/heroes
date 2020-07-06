@@ -30,12 +30,11 @@ class BanController extends AbstractAdminController
         $fields = $request->all();
         $fields['issuer'] = $request->user()->id;
 
-        $this->validate(request(), [
-            'reason' => 'min:5|max:200|required',
-            'user_id' => 'integer|gt:0',
-        ]);
-        $fields['ban_id'] = User::find($fields['user_id'])->bans->last()->id;
+        $not_validated = $this->validateData($request, Unban::getRules());
+        if($not_validated)
+            return $not_validated;
 
+        $fields['ban_id'] = User::find($fields['user_id'])->bans->last()->id;
         unset($fields['user_id']);
         $unban = Unban::firstOrCreate($fields);
         if($unban->wasRecentlyCreated)

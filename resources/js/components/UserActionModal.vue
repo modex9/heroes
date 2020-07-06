@@ -93,11 +93,13 @@
                     return document.location.href;
                 else if (this.action.startsWith('ban'))
                     return `${window.origin}/public/ban/${this.user['id']}`;
+                else if (this.action.includes('ban'))
+                    return `${window.origin}/public/unban/${this.user['id']}`;
             },
             method() {
                 if (this.action.includes('edit'))
                     return 'PUT';
-                else if (this.action.includes('add') || this.action.startsWith('ban'))
+                else if (this.action.includes('add') || this.action.includes('ban'))
                     return 'POST';
                 else if (this.action.includes('delete'))
                     return 'DELETE';
@@ -110,8 +112,10 @@
                         return `New User ${this.data['nickname']} was successfully created.`;
                     case 'delete' :
                         return `User ${this.user['nickname']} was successfully deleted.`;
-                    case 'delete' :
+                    case 'ban' :
                         return `User ${this.user['nickname']} was banned for ${this.data['duration']}.`;
+                    case 'unban' :
+                        return `User ${this.user['nickname']} was successfully unbanned.`;
                     default :
                         return '';
                 }
@@ -121,6 +125,8 @@
                     return 'Confirm Deletion';
                 else if (this.action.startsWith('ban'))
                     return 'Ban User';
+                else if (this.action.includes('unban'))
+                    return 'Remove Ban';
                 else
                     return 'Save';
             },
@@ -140,7 +146,7 @@
             handleAction() {
                 this.modalErrors = {};
                 //If we are banning, we send user id in a different field name.
-                if((this.actionName.startsWith('ban')))
+                if((this.actionName.includes('ban')))
                     this.data['user_id'] = this.user['id'];
                 else
                     this.data['id'] = this.user['id'];
@@ -162,8 +168,10 @@
                             this.$emit('user-updated', data['user']);
                         else if(this.actionName == 'delete')
                             this.$emit('user-deleted', this.user);
-                        else if(this.actionName == 'ban')
+                        else if(this.actionName.includes('ban')) {
+                            this.user.banned = this.actionName === 'ban'
                             this.$emit('user-banned', this.user);
+                        }
                         this.actionSuccess = true;
                     }
                     if(data['error'])

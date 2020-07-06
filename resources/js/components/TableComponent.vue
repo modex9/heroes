@@ -112,6 +112,13 @@
                             label : 'Type',
                         },
                     },
+                    'unban' : {
+                        reason : {
+                            name : 'reason',
+                            type : 'input',
+                            label : 'Reason',
+                        },
+                    },
                     delete : {
                         alert : {
                             type : 'text',
@@ -146,6 +153,8 @@
                         return `Delete user ${this.modalInputs['user']['nickname']}`
                     case 'ban':
                         return `Ban user ${this.modalInputs['user']['nickname']}`
+                    case 'unban':
+                        return `Remove ban for user ${this.modalInputs['user']['nickname']}`
                     default:
                         return '';
                 }
@@ -225,7 +234,7 @@
                 delete this.users[user['id']];
             },
             banUser(user) {
-                this.users[user['id']]['banned'] = true;
+                this.users[user['id']]['banned'] = user.banned;
             }
         }
     }

@@ -13,4 +13,10 @@ class Unban extends Model
     public function ban() {
         return $this->belongsTo('App\Ban');
     }
+
+    public static function getRules() {
+        return [
+            'reason' => 'min:5|max:200|required',
+       ];
+   }
 }
