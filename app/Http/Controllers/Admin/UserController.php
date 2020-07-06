@@ -45,17 +45,33 @@ class UserController extends AbstractAdminController
     {
         $user_rules = User::getRules(isset($user) ? $user : null);
         $user_rules['password'] = 'string|min:6|max:16|required';
-        $not_validated = $this->validateData($request, $user_rules);
+
+        $custom_messages = [];
+        if($request->referralID) {
+            $user_rules['referralID'] = 'exists:App\User,nickname';
+            $custom_messages['referralID.exists'] = 'User ' . $request->referralID . ' does not exist';
+        }
+
+        $not_validated = $this->validateData($request, $user_rules, $custom_messages);
         if($not_validated)
             return $not_validated;
 
-        $user = User::create([
+        $user_fields = [
             'nickname' => $request->nickname,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role_id' => $request->role
-        ]);
+            'role_id' => $request->role,
+        ];
+        $user_fields['referralID'] = $request->referralID ? $this->getReferralId($request) : '';
+
+        $user = User::create($user_fields);
         return response()->json(array('success' => true, 'user' => $user), 200);
+    }
+
+    public function getReferralId(Request $request) {
+        // todo : field name referralID is missleading
+        $referral = User::where('nickname', $request->referralID)->get()->first();
+        return $referral->id;
     }
 
     /**

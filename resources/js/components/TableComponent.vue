@@ -10,7 +10,7 @@
             <tr v-for="user in users" :class="{ 'banned' : user['banned']}">
                 <td>{{user.nickname}}</td>
                 <td>{{user.email}}</td>
-                <td>{{user.referral}}</td>
+                <td>{{getReferralName(user.referralID)}}</td>
                 <td>{{roles[user.role_id]['name']}}</td>
                 <td><user-actions @change="updateSelected"  :user-id="user.id" :user-banned="user.banned"></user-actions></td>
             </tr>
@@ -89,8 +89,8 @@
                             type : 'select',
                             label : 'Role',
                         },
-                        referral : {
-                            name : 'referral',
+                        referralID : {
+                            name : 'referralID',
                             type : 'input',
                             label : 'Referral',
                         },
@@ -235,7 +235,12 @@
             },
             banUser(user) {
                 this.users[user['id']]['banned'] = user.banned;
-            }
+            },
+            getReferralName(refId) {
+                if(refId)
+                    return this.users[refId].nickname;
+                return '-';
+            },
         }
     }
 </script>

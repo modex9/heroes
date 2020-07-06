@@ -1999,8 +1999,8 @@ __webpack_require__.r(__webpack_exports__);
             type: 'select',
             label: 'Role'
           },
-          referral: {
-            name: 'referral',
+          referralID: {
+            name: 'referralID',
             type: 'input',
             label: 'Referral'
           }
@@ -2150,6 +2150,10 @@ __webpack_require__.r(__webpack_exports__);
     },
     banUser: function banUser(user) {
       this.users[user['id']]['banned'] = user.banned;
+    },
+    getReferralName: function getReferralName(refId) {
+      if (refId) return this.users[refId].nickname;
+      return '-';
     }
   }
 });
@@ -38052,7 +38056,9 @@ var render = function() {
                 _vm._v(" "),
                 _c("td", [_vm._v(_vm._s(user.email))]),
                 _vm._v(" "),
-                _c("td", [_vm._v(_vm._s(user.referral))]),
+                _c("td", [
+                  _vm._v(_vm._s(_vm.getReferralName(user.referralID)))
+                ]),
                 _vm._v(" "),
                 _c("td", [_vm._v(_vm._s(_vm.roles[user.role_id]["name"]))]),
                 _vm._v(" "),

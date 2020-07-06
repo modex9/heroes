@@ -10,8 +10,8 @@ use Illuminate\Validation\Rule;
 abstract class AbstractAdminController extends Controller
 {
 
-    public function validateData($request, $rules) {
-        $validator = Validator::make($request->all(), $rules);
+    public function validateData($request, $rules, $messages = []) {
+        $validator = Validator::make($request->all(), $rules, $messages);
         // Validate the input and return correct response
         if ($validator->fails())
         {
